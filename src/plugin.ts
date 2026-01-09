@@ -1,15 +1,11 @@
-import crypto from 'node:crypto';
 import path from 'node:path';
 
 import createDebug from 'debug';
-import findCacheDir from 'find-cache-dir';
-import { FlatCache } from 'flat-cache';
 import { matcher } from 'micromatch';
 import * as docGen from 'react-docgen-typescript';
 import ts from 'typescript';
 import type * as webpack from 'webpack';
 
-import { DocGenDependency } from './dependency';
 import { type GeneratorOptions, generateDocgenCodeBlock } from './generateDocgenCodeBlock';
 import type { LoaderOptions } from './types';
 
@@ -54,71 +50,6 @@ const matchGlob = (globs?: string[]) => {
   return (filename: string) => Boolean(filename && matchers.find((match) => match(filename)));
 };
 
-// The cache is used only with webpack 4 for now as webpack 5 comes with caching of its own
-const cacheId = 'ts-docgen';
-const cacheDir = findCacheDir({ name: cacheId });
-const cache = new FlatCache();
-cache.load(cacheId, cacheDir);
-
-/** Run the docgen parser and inject the result into the output */
-/** This is used for webpack 4 or earlier */
-function processModule(
-  parser: docGen.FileParser,
-  webpackModule: webpack.Module,
-  tsProgram: ts.Program,
-  loaderOptions: Required<LoaderOptions>,
-) {
-  if (!webpackModule) {
-    return;
-  }
-
-  const hash = crypto
-    .createHash('sha1')
-    // @ts-expect-error: (?)
-    .update(webpackModule._source._value)
-    .digest('hex');
-  const cached = cache.get(hash);
-
-  if (cached) {
-    // @ts-expect-error: (?)
-    debugInclude(`Got cached docgen for "${webpackModule.request}"`);
-    // @ts-expect-error: (?)
-    webpackModule._source._value = cached;
-    return;
-  }
-
-  // @ts-expect-error: (Webpack 4 type)
-  const { userRequest } = webpackModule;
-
-  const componentDocs = parser.parseWithProgramProvider(userRequest, () => tsProgram);
-
-  if (!componentDocs.length) {
-    return;
-  }
-
-  // Read the original source file content
-  const sourceCode = ts.sys.readFile(userRequest) || '';
-  const fullOutput = generateDocgenCodeBlock({
-    filename: userRequest,
-    source: sourceCode,
-    componentDocs,
-    ...loaderOptions,
-  });
-
-  // Extract just the docgen code blocks
-  const docs = fullOutput.includes('try {')
-    ? fullOutput.substring(fullOutput.indexOf('try {'))
-    : fullOutput.substring(sourceCode.length);
-
-  // @ts-expect-error: (Webpack 4 type)
-  let sourceWithDocs = webpackModule._source._value;
-
-  sourceWithDocs += `\n${docs}\n`;
-
-  // @ts-expect-error: (Webpack 4 type)
-  webpackModule._source._value = sourceWithDocs;
-}
-
 /** Inject typescript docgen information into modules at the end of a build */
 export default class DocgenPlugin implements webpack.WebpackPluginInstance {
   public static defaultOptions = {
@@ -135,18 +66,6 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
   }
 
   apply(compiler: webpack.Compiler): void {
-    // Property compiler.version is set only starting from webpack 5
-    const webpackVersion = compiler.webpack?.version || '';
-    const isWebpack5 = parseInt(webpackVersion.split('.')[0], 10) >= 5;
-
-    if (isWebpack5) {
-      this.applyWebpack5(compiler);
-    } else {
-      this.applyWebpack4(compiler);
-    }
-  }
-
-  applyWebpack5(compiler: webpack.Compiler): void {
     const pluginName = 'DocGenPlugin';
     const { docgenOptions, compilerOptions, generateOptions } = this.getOptions();
     const docGenParser = docGen.withCompilerOptions(compilerOptions, docgenOptions);
@@ -154,172 +73,170 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
     const isExcluded = matchGlob(exclude);
     const isIncluded = matchGlob(include);
 
-    compiler.hooks.compilation.tap(pluginName, (compilation: webpack.Compilation) => {
-      // Since this file is needed only for webpack 5, load it only then
-      // to simplify the implementation of the file.
+    // Track modules and create tsProgram lazily
+    const modulePaths = new Set<string>();
+    let tsProgram: ts.Program | undefined;
+    // Store transformed sources keyed by resource path
+    const transformedSources = new Map<string, string>();
 
-      compilation.dependencyTemplates.set(
-        // @ts-expect-error: (Webpack 4 type)
-        DocGenDependency,
-        // @ts-expect-error: (Webpack 4 type)
-        new DocGenDependency.Template(),
-      );
+    // Use NormalModuleFactory to transform source directly in the plugin
+    compiler.hooks.normalModuleFactory.tap(pluginName, (normalModuleFactory) => {
+      // Collect modules that need processing
+      normalModuleFactory.hooks.beforeResolve.tap(pluginName, (data) => {
+        const resource = data.request;
+        if (!resource || typeof resource !== 'string') {
+          return;
+        }
 
-      compilation.hooks.seal.tap(pluginName, () => {
-        const modulesToProcess: [string, webpack.Module][] = [];
+        if (isExcluded(resource)) {
+          return;
+        }
 
-        // 1. Aggregate modules to process
-        compilation.modules.forEach((module: webpack.Module) => {
-          if (!module.nameForCondition) {
-            return;
+        if (!isIncluded(resource)) {
+          return;
+        }
+
+        modulePaths.add(resource);
+      });
+
+      // Transform source in afterResolve - read original TS file and transform it
+      normalModuleFactory.hooks.afterResolve.tap(pluginName, (data) => {
+        const createData = (data as { createData?: { resource?: string } }).createData;
+        if (!createData) {
+          return;
+        }
+
+        const resource = createData.resource;
+        if (!resource || typeof resource !== 'string') {
+          return;
+        }
+
+        // Check if this module should be processed
+        if (isExcluded(resource)) {
+          debugExclude(`Module not matched in "exclude": ${resource}`);
+          return;
+        }
+
+        if (!isIncluded(resource)) {
+          debugExclude(`Module not matched in "include": ${resource}`);
+          return;
+        }
+
+        debugInclude(`Transforming source for: ${resource}`);
+
+        // Read the original TypeScript source file first
+        const sourceCode = ts.sys.readFile(resource) || '';
+        if (!sourceCode) {
+          return;
+        }
+
+        // Create tsProgram lazily with all collected modules
+        if (!tsProgram && modulePaths.size > 0) {
+          tsProgram = ts.createProgram(Array.from(modulePaths), compilerOptions);
+        }
+
+        // Parse components and transform source
+        // Use a function that creates/updates the program as needed
+        const componentDocs = docGenParser.parseWithProgramProvider(resource, () => {
+          if (!tsProgram) {
+            tsProgram = ts.createProgram(Array.from(modulePaths), compilerOptions);
           }
+          return tsProgram;
+        });
+        if (!componentDocs.length) {
+          return;
+        }
 
-          const nameForCondition = module.nameForCondition() || '';
-
-          // Ignore modules that haven't been built yet for webpack 5
-          if (!compilation.builtModules.has(module)) {
-            debugExclude(`Ignoring un-built module: ${nameForCondition}`);
-            return;
-          }
-
-          // Ignore external modules
-          // @ts-expect-error: (Webpack 4 type)
-          if (module.external) {
-            debugExclude(`Ignoring external module: ${nameForCondition}`);
-            return;
-          }
-
-          // Ignore raw requests
-          // @ts-expect-error: (Webpack 4 type)
-          if (!module.rawRequest) {
-            debugExclude(`Ignoring module without "rawRequest": ${nameForCondition}`);
-            return;
-          }
-
-          if (isExcluded(nameForCondition)) {
-            debugExclude(`Module not matched in "exclude": ${nameForCondition}`);
-            return;
-          }
-
-          if (!isIncluded(nameForCondition)) {
-            debugExclude(`Module not matched in "include": ${nameForCondition}`);
-            return;
-          }
-
-          modulesToProcess.push([nameForCondition, module]);
+        // Transform source and add docgen code
+        const transformedSource = generateDocgenCodeBlock({
+          filename: resource,
+          source: sourceCode,
+          componentDocs,
+          ...generateOptions,
         });
 
-        // 2. Create a ts program with the modules
-        const tsProgram = ts.createProgram(
-          modulesToProcess.map(([name]) => name),
-          compilerOptions,
-        );
-
-        // 3. Process and parse each module and add the type information
-        // as a dependency
-        modulesToProcess.forEach(([name, module]) => {
-          // Since this file is needed only for webpack 5, load it only then
-          // to simplify the implementation of the file.
-
-          // Read the original source file content (before webpack processing)
-          // react-docgen-typescript will parse from the file, but we need the source for transformation
-          const sourceCode = ts.sys.readFile(name) || '';
-          const fullOutput = generateDocgenCodeBlock({
-            filename: name,
-            source: sourceCode,
-            componentDocs: docGenParser.parseWithProgramProvider(name, () => tsProgram),
-            ...generateOptions,
-          });
-
-          // Extract just the docgen code blocks (everything after the original source)
-          // Note: If transformation happened, the source length changed, so we find where docgen code starts
-          // by looking for the try block pattern that we inject
-          const docgenCode = fullOutput.includes('try {')
-            ? fullOutput.substring(fullOutput.indexOf('try {'))
-            : fullOutput.substring(sourceCode.length);
-
-          module.addDependency(
-            // @ts-expect-error: (Webpack 4 type)
-            new DocGenDependency(docgenCode),
-          );
-        });
+        // Store transformed source for injection
+        transformedSources.set(resource, transformedSource);
       });
     });
-  }
 
-  applyWebpack4(compiler: webpack.Compiler): void {
-    const { docgenOptions, compilerOptions } = this.getOptions();
-    const parser = docGen.withCompilerOptions(compilerOptions, docgenOptions);
-    const { exclude = [], include = ['**/**.tsx'] } = this.options;
-    const isExcluded = matchGlob(exclude);
-    const isIncluded = matchGlob(include);
-
-    compiler.hooks.make.tap(this.name, (compilation) => {
-      compilation.hooks.seal.tap(this.name, () => {
-        const modulesToProcess: webpack.Module[] = [];
-
-        compilation.modules.forEach((module: webpack.Module) => {
-          // @ts-expect-error: (Webpack 4 type)
-          if (!module.built) {
-            // @ts-expect-error: (Webpack 4 type)
-            debugExclude(`Ignoring un-built module: ${module.userRequest}`);
-            return;
+    // Transform source using AST - add __docgen property to components
+    // Use optimizeModules hook to modify source after loaders but before optimization
+    compiler.hooks.compilation.tap(pluginName, (compilation) => {
+      compilation.hooks.optimizeModules.tap(pluginName, (modules) => {
+        // Convert Iterable to Array
+        const modulesArray = Array.from(modules);
+        for (const module of modulesArray) {
+          const resource = (module as { resource?: string }).resource;
+          if (!resource || typeof resource !== 'string') {
+            continue;
           }
 
-          // @ts-expect-error: (Webpack 4 type)
-          if (module.external) {
-            // @ts-expect-error: (Webpack 4 type)
-            debugExclude(`Ignoring external module: ${module.userRequest}`);
-            return;
+          // Only process modules that match our include/exclude patterns
+          if (isExcluded(resource)) {
+            continue;
           }
 
-          // @ts-expect-error: (Webpack 4 type)
-          if (!module.rawRequest) {
-            debugExclude(
-              // @ts-expect-error: (Webpack 4 type)
-              `Ignoring module without "rawRequest": ${module.userRequest}`,
-            );
-            return;
+          if (!isIncluded(resource)) {
+            continue;
           }
 
-          // @ts-expect-error: (Webpack 4 type)
-          if (isExcluded(module.userRequest)) {
-            debugExclude(
-              // @ts-expect-error: (Webpack 4 type)
-              `Module not matched in "exclude": ${module.userRequest}`,
-            );
-            return;
+          const moduleSource = (module as { _source?: { source: () => string } })._source;
+          if (!moduleSource) {
+            continue;
           }
 
-          // @ts-expect-error: (Webpack 4 type)
-          if (!isIncluded(module.userRequest)) {
-            debugExclude(
-              // @ts-expect-error: (Webpack 4 type)
-              `Module not matched in "include": ${module.userRequest}`,
-            );
-            return;
+          // Get the current source code
+          const originalSource = moduleSource.source();
+          if (!originalSource) {
+            continue;
           }
 
-          // @ts-expect-error: (Webpack 4 type)
-          debugInclude(module.userRequest);
-          modulesToProcess.push(module);
-        });
+          // Simple AST transformation: find const declarations and add __docgen property
+          // Use regex to find const declarations that look like components
+          // Pattern: const ComponentName = () => ...
+          const constDeclarationPattern = /const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*\([^)]*\)\s*=>/g;
+          let modifiedSource = originalSource;
+          const additions: Array<{ index: number; text: string }> = [];
 
-        const tsProgram = ts.createProgram(
-          // @ts-expect-error: (Webpack 4 type)
-          modulesToProcess.map((v) => v.userRequest),
-          compilerOptions,
-        );
+          let match;
+          while ((match = constDeclarationPattern.exec(originalSource)) !== null) {
+            const componentName = match[1];
+            const insertIndex = match.index + match[0].length;
 
-        modulesToProcess.forEach((m) =>
-          processModule(parser, m, tsProgram, {
-            docgenCollectionName: 'STORYBOOK_REACT_CLASSES',
-            setDisplayName: true,
-            typePropName: 'type',
-          }),
-        );
+            // Find the end of the statement (semicolon or end of line)
+            let endIndex = originalSource.indexOf(';', insertIndex);
+            if (endIndex === -1) {
+              // No semicolon found, find end of line or end of file
+              endIndex = originalSource.indexOf('\n', insertIndex);
+              if (endIndex === -1) {
+                endIndex = originalSource.length;
+              }
+            } else {
+              endIndex += 1; // Include the semicolon
+            }
 
-        cache.save();
+            // Add the __docgen property after the const declaration
+            additions.push({
+              index: endIndex,
+              text: `\n${componentName}.__docgen = true;`,
+            });
+          }
+
+          // Apply additions in reverse order to preserve indices
+          additions.reverse();
+          for (const addition of additions) {
+            modifiedSource =
+              modifiedSource.slice(0, addition.index) + addition.text + modifiedSource.slice(addition.index);
+          }
+
+          // Replace the module source if we made changes
+          if (modifiedSource !== originalSource) {
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const { RawSource } = require('webpack-sources');
+            (module as { _source?: any })._source = new RawSource(modifiedSource);
+          }
+        }
       });
     });
   }

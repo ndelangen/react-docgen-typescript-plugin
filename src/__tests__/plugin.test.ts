@@ -6,7 +6,8 @@ import ReactDocgenTypeScriptPlugin from '../plugin';
 import { compile } from './test-helpers';
 
 test('source', async () => {
-  await compile(new ReactDocgenTypeScriptPlugin(), 'src');
+  const output = await compile(new ReactDocgenTypeScriptPlugin(), 'src');
+  console.log(output);
 
   const process = exec('node --experimental-strip-types src/__tests__/check-src.ts');
 

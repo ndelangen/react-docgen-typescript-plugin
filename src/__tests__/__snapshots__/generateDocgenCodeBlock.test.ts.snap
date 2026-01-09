@@ -30,10 +30,12 @@ catch (__react_docgen_typescript_loader_error) { }"
 
 exports[`adds component with display name to docgen collection 1`] = `
 "interface ButtonComponentProps {
-    text: string;
+  text: string;
 }
+
 export const Button = (props: ButtonComponentProps) => <button>{props.text}</button>;
-Button.displayName = "MyButtonDisplayName";
+
+Button.displayName = 'MyButtonDisplayName';
 
 try {
     // @ts-ignore
@@ -169,10 +171,12 @@ catch (__react_docgen_typescript_loader_error) { }"
 
 exports[`component fixture > DisplayName.tsx has code block generated 1`] = `
 "interface ButtonComponentProps {
-    text: string;
+  text: string;
 }
+
 export const Button = (props: ButtonComponentProps) => <button>{props.text}</button>;
-Button.displayName = "MyButtonDisplayName";
+
+Button.displayName = 'MyButtonDisplayName';
 
 try {
     // @ts-ignore

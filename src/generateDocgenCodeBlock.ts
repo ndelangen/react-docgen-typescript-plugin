@@ -24,7 +24,7 @@ export interface GeneratorOptions {
  * This is necessary because we need to reference the component by displayName for __docgenInfo,
  * which may differ from the actual function name or may not exist for anonymous functions.
  */
-function transformDirectDefaultExports(
+export function transformDirectDefaultExports(
   source: string,
   sourceFile: ts.SourceFile,
   componentsToTransform: ComponentDoc[],
@@ -491,14 +491,35 @@ export function generateDocgenCodeBlock(options: GeneratorOptions): string {
   // Check if any component is a direct default export where the identifier doesn't match displayName
   // This happens when: export default function Name() but displayName is different (from filename)
   // or: export default () => {} (anonymous, displayName from filename)
+  // Note: We only transform/inject aliases for DEFAULT exports, not named exports
+  const filenameBase = path.basename(options.filename, path.extname(options.filename));
   const componentsNeedingTransformation = options.componentDocs.filter((d) => {
-    const identifier = d.expression?.getName() || d.displayName;
-    // If identifier is "default" or doesn't match displayName, we need to create an alias or transform
-    return identifier === 'default' || identifier !== d.displayName;
+    const originalIdentifier = d.expression?.getName() || d.displayName;
+    // If identifier is "default", it's definitely a default export
+    if (originalIdentifier === 'default') {
+      return true;
+    }
+    // If identifier doesn't match displayName, check if it's a default export
+    const identifierMismatch = originalIdentifier !== d.displayName;
+    if (!identifierMismatch) {
+      return false;
+    }
+    // If there's no expression name, it's an anonymous default export
+    if (!d.expression?.getName()) {
+      return true;
+    }
+    // If expression name exists but doesn't match displayName:
+    // - Default export: displayName typically matches filename (e.g., DirectDefaultExport from DirectDefaultExport.tsx)
+    // - Named export with displayName: displayName is explicitly set and doesn't match filename
+    // Check if displayName matches the filename base (indicating it came from filename, not explicit setting)
+    const displayNameMatchesFilename = d.displayName === filenameBase || d.displayName.startsWith(filenameBase);
+    return displayNameMatchesFilename;
   });
 
-  // Transform source for unit tests (before webpack processing)
-  // For webpack, we'll inject aliases instead
+  // Transform source BEFORE webpack processes it
+  // This ensures webpack uses our transformed names (e.g., DirectDefaultExport)
+  // instead of creating its own names (e.g., DirectDefaultExport_DefaultPropValueComponent)
+  // This works for both unit tests and webpack builds
   let transformedSource = options.source;
   if (componentsNeedingTransformation.length > 0) {
     transformedSource = transformDirectDefaultExports(options.source, sourceFile, componentsNeedingTransformation);
@@ -519,8 +540,12 @@ export function generateDocgenCodeBlock(options: GeneratorOptions): string {
       undefined,
     );
 
-  const codeBlocks = options.componentDocs.map((d) =>
-    wrapInTryStatement(
+  const codeBlocks = options.componentDocs.map((d) => {
+    // After source transformation, the displayName is now the actual identifier
+    // No aliases needed - webpack will use our transformed names
+    const identifier = getComponentIdentifier(d);
+
+    return wrapInTryStatement(
       [
         options.setDisplayName ? setDisplayName(d) : null,
         setComponentDocGen(d, options),
@@ -528,8 +553,8 @@ export function generateDocgenCodeBlock(options: GeneratorOptions): string {
           ? null
           : insertDocgenIntoGlobalCollection(d, options.docgenCollectionName, relativeFilename),
       ].filter((s) => s !== null) as ts.Statement[],
-    ),
-  );
+    );
+  });
 
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
   const printNode = (sourceNode: ts.Node) => printer.printNode(ts.EmitHint.Unspecified, sourceNode, sourceFile);

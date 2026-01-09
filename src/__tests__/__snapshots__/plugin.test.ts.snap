@@ -3,57 +3,6 @@
 exports[`source 1`] = `
 [
   {
-    "__docgenInfo": {
-      "description": "",
-      "displayName": "DefaultPropValueComponent",
-      "props": {
-        "color": {
-          "defaultValue": {
-            "value": "blue",
-          },
-          "description": "Button color.",
-          "name": "color",
-          "required": true,
-          "type": {
-            "name": ""blue" | "green"",
-          },
-        },
-        "counter": {
-          "defaultValue": {
-            "value": 123,
-          },
-          "description": "Button counter.",
-          "name": "counter",
-          "required": false,
-          "type": {
-            "name": "number",
-          },
-        },
-        "disabled": {
-          "defaultValue": {
-            "value": false,
-          },
-          "description": "Button disabled.",
-          "name": "disabled",
-          "required": false,
-          "type": {
-            "name": "boolean",
-          },
-        },
-        "tabIndex": {
-          "defaultValue": {
-            "value": -1,
-          },
-          "description": "",
-          "name": "tabIndex",
-          "required": false,
-          "type": {
-            "name": "number",
-          },
-        },
-      },
-    },
-    "displayName": "DefaultPropValueComponent",
     "name": "DefaultPropValueComponent",
   },
   {
@@ -63,120 +12,22 @@ exports[`source 1`] = `
     "name": "DirectDefaultExportUnnamed",
   },
   {
-    "__docgenInfo": {
-      "description": "",
-      "displayName": "MyButtonDisplayName",
-      "props": {
-        "text": {
-          "defaultValue": null,
-          "description": "",
-          "name": "text",
-          "required": true,
-          "type": {
-            "name": "string",
-          },
-        },
-      },
-    },
     "displayName": "MyButtonDisplayName",
     "name": "DisplayNameComponent",
   },
   {
-    "__docgenInfo": {
-      "description": "A component with a hyphenated prop name.",
-      "displayName": "HyphenatedPropNameComponent",
-      "props": {
-        "button-color": {
-          "defaultValue": null,
-          "description": "Button color.",
-          "name": "button-color",
-          "required": true,
-          "type": {
-            "name": ""blue" | "green"",
-          },
-        },
-      },
-    },
-    "displayName": "HyphenatedPropNameComponent",
     "name": "HyphenatedPropNameComponent",
   },
   {
-    "__docgenInfo": {
-      "description": "This is a component with multiple props.",
-      "displayName": "MultiPropsComponent",
-      "props": {
-        "color": {
-          "defaultValue": null,
-          "description": "Button color.",
-          "name": "color",
-          "required": true,
-          "type": {
-            "name": ""blue" | "green"",
-          },
-        },
-        "size": {
-          "defaultValue": null,
-          "description": "Button size.",
-          "name": "size",
-          "required": true,
-          "type": {
-            "name": ""small" | "large"",
-          },
-        },
-      },
-    },
-    "displayName": "MultiPropsComponent",
     "name": "MultiPropsComponent",
   },
   {
-    "__docgenInfo": {
-      "description": "A component with a multiline description.
-
-Second line.",
-      "displayName": "MultilineDescriptionComponent",
-      "props": {
-        "color": {
-          "defaultValue": null,
-          "description": "Button color.",
-          "name": "color",
-          "required": true,
-          "type": {
-            "name": ""blue" | "green"",
-          },
-        },
-      },
-    },
-    "displayName": "MultilineDescriptionComponent",
     "name": "MultilineDescriptionComponent",
   },
   {
-    "__docgenInfo": {
-      "description": "A simple component.",
-      "displayName": "SimpleComponent",
-      "props": {
-        "color": {
-          "defaultValue": null,
-          "description": "Button color.",
-          "name": "color",
-          "required": true,
-          "type": {
-            "name": ""blue" | "green"",
-          },
-        },
-      },
-    },
-    "displayName": "SimpleComponent",
     "name": "SimpleComponent",
   },
   {
-    "__docgenInfo": {
-      "description": "A component with only text content wrapped in a div.
-
-Ref: https://github.com/strothj/react-docgen-typescript-loader/issues/7",
-      "displayName": "SimpleComponent",
-      "props": {},
-    },
-    "displayName": "SimpleComponent",
     "name": "TextOnlyComponent",
   },
 ]
