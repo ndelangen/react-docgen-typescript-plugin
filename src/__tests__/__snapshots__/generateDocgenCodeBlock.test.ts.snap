@@ -1,17 +1,17 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`adds component to docgen collection 1`] = `
-"import * as React from "react";
+"import type { FC, PropsWithChildren } from 'react';
 
 interface SimpleComponentProps {
   /** Button color. */
-  color: "blue" | "green";
+  color: 'blue' | 'green';
 }
 
 /**
  * A simple component.
  */
-export const SimpleComponent: React.FC<SimpleComponentProps> = (props) => (
+export const SimpleComponent: FC<PropsWithChildren<SimpleComponentProps>> = (props) => (
   <button style={{ backgroundColor: props.color }}>{props.children}</button>
 );
 
@@ -29,17 +29,13 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`adds component with display name to docgen collection 1`] = `
-"import * as React from "react";
-
-interface ButtonComponentProps {
+"interface ButtonComponentProps {
   text: string;
 }
 
-export const Button = (props: ButtonComponentProps) => (
-  <button>{props.text}</button>
-);
+export const Button = (props: ButtonComponentProps) => <button>{props.text}</button>;
 
-Button.displayName = "MyButtonDisplayName";
+Button.displayName = 'MyButtonDisplayName';
 
 try {
     // @ts-ignore
@@ -53,7 +49,7 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > DefaultPropValue.tsx has code block generated 1`] = `
-"import * as React from "react";
+"import type { FC, PropsWithChildren } from 'react';
 
 interface DefaultPropValueComponentProps {
   /**
@@ -61,7 +57,7 @@ interface DefaultPropValueComponentProps {
    *
    * @default blue
    **/
-  color: "blue" | "green";
+  color: 'blue' | 'green';
 
   /**
    * Button counter.
@@ -79,14 +75,16 @@ interface DefaultPropValueComponentProps {
 /**
  * Component with a prop with a default value.
  */
-export const DefaultPropValueComponent: React.FC<DefaultPropValueComponentProps> = (
-  props
-) => (
+const DefaultPropValueComponentImpl: FC<PropsWithChildren<DefaultPropValueComponentProps>> = (props) => (
   <button disabled={props.disabled} style={{ backgroundColor: props.color }}>
     {props.counter}
     {props.children}
   </button>
 );
+
+export const DefaultPropValueComponent = DefaultPropValueComponentImpl as typeof DefaultPropValueComponentImpl & {
+  defaultProps: Partial<DefaultPropValueComponentProps>;
+};
 
 DefaultPropValueComponent.defaultProps = {
   counter: 123,
@@ -98,23 +96,62 @@ try {
     // @ts-ignore
     DefaultPropValueComponent.displayName = "DefaultPropValueComponent";
     // @ts-ignore
-    DefaultPropValueComponent.__docgenInfo = { "description": "Component with a prop with a default value.", "displayName": "DefaultPropValueComponent", "props": { "color": { "defaultValue": { value: "blue" }, "description": "Button color.", "name": "color", "required": true, "type": { "name": "\\"blue\\" | \\"green\\"" } }, "counter": { "defaultValue": { value: 123 }, "description": "Button counter.", "name": "counter", "required": false, "type": { "name": "number" } }, "disabled": { "defaultValue": { value: false }, "description": "Button disabled.", "name": "disabled", "required": false, "type": { "name": "boolean" } }, "tabIndex": { "defaultValue": { value: -1 }, "description": "", "name": "tabIndex", "required": false, "type": { "name": "number" } } } };
+    DefaultPropValueComponent.__docgenInfo = { "description": "", "displayName": "DefaultPropValueComponent", "props": { "color": { "defaultValue": { value: "blue" }, "description": "Button color.", "name": "color", "required": true, "type": { "name": "\\"blue\\" | \\"green\\"" } }, "counter": { "defaultValue": { value: 123 }, "description": "Button counter.", "name": "counter", "required": false, "type": { "name": "number" } }, "disabled": { "defaultValue": { value: false }, "description": "Button disabled.", "name": "disabled", "required": false, "type": { "name": "boolean" } }, "tabIndex": { "defaultValue": { value: -1 }, "description": "", "name": "tabIndex", "required": false, "type": { "name": "number" } } } };
+}
+catch (__react_docgen_typescript_loader_error) { }"
+`;
+
+exports[`component fixture > DirectDefaultExport.tsx has code block generated 1`] = `
+"import type { PropsWithChildren } from 'react';
+
+interface DefaultPropValueComponentProps {
+  /**
+   * Button color.
+   *
+   * @default blue
+   **/
+  color: 'blue' | 'green';
+
+  /**
+   * Button counter.
+   */
+  counter: number;
+
+  /**
+   * Button disabled.
+   */
+  disabled: boolean;
+
+  tabIndex: number;
+}
+
+/**
+ * Component with a prop with a default value.
+ */
+export default function DefaultPropValueComponent(props: PropsWithChildren<DefaultPropValueComponentProps>) {
+  return (
+    <button disabled={props.disabled} style={{ backgroundColor: props.color }}>
+      {props.counter}
+      {props.children}
+    </button>
+  );
+}
+
+try {
+    // @ts-ignore
+    default.__docgenInfo = { "description": "Component with a prop with a default value.", "displayName": "DirectDefaultExport", "props": { "color": { "defaultValue": { value: "blue" }, "description": "Button color.", "name": "color", "required": true, "type": { "name": "\\"blue\\" | \\"green\\"" } }, "counter": { "defaultValue": null, "description": "Button counter.", "name": "counter", "required": true, "type": { "name": "number" } }, "disabled": { "defaultValue": null, "description": "Button disabled.", "name": "disabled", "required": true, "type": { "name": "boolean" } }, "tabIndex": { "defaultValue": null, "description": "", "name": "tabIndex", "required": true, "type": { "name": "number" } } } };
 }
 catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > DisplayName.tsx has code block generated 1`] = `
-"import * as React from "react";
-
-interface ButtonComponentProps {
+"interface ButtonComponentProps {
   text: string;
 }
 
-export const Button = (props: ButtonComponentProps) => (
-  <button>{props.text}</button>
-);
+export const Button = (props: ButtonComponentProps) => <button>{props.text}</button>;
 
-Button.displayName = "MyButtonDisplayName";
+Button.displayName = 'MyButtonDisplayName';
 
 try {
     // @ts-ignore
@@ -124,7 +161,7 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > HyphenatedPropName.tsx has code block generated 1`] = `
-"import * as React from "react";
+"import type { FC, PropsWithChildren } from "react";
 
 interface HyphenatedPropNameProps {
   /** Button color. */
@@ -134,7 +171,7 @@ interface HyphenatedPropNameProps {
 /**
  * A component with a hyphenated prop name.
  */
-export const HyphenatedPropNameComponent: React.FC<HyphenatedPropNameProps> = (
+export const HyphenatedPropNameComponent: FC<PropsWithChildren<HyphenatedPropNameProps>> = (
   props
 ) => (
   <button style={{ backgroundColor: props["button-color"] }}>
@@ -152,7 +189,7 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > MultiProps.tsx has code block generated 1`] = `
-"import * as React from "react";
+"import type { FC, PropsWithChildren } from "react";
 
 interface MultiPropsComponentProps {
   /** Button color. */
@@ -165,7 +202,7 @@ interface MultiPropsComponentProps {
 /**
  * This is a component with multiple props.
  */
-export const MultiPropsComponent: React.FC<MultiPropsComponentProps> = (
+export const MultiPropsComponent: FC<PropsWithChildren<MultiPropsComponentProps>> = (
   props
 ) => <button style={{ backgroundColor: props.color }}>{props.children}</button>;
 
@@ -179,11 +216,11 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > MultilineDescription.tsx has code block generated 1`] = `
-"import * as React from "react";
+"import type { FC, PropsWithChildren } from 'react';
 
 interface MultilineDescriptionProps {
   /** Button color. */
-  color: "blue" | "green";
+  color: 'blue' | 'green';
 }
 
 /**
@@ -191,9 +228,9 @@ interface MultilineDescriptionProps {
  *
  * Second line.
  */
-export const MultilineDescriptionComponent: React.FC<MultilineDescriptionProps> = (
-  props
-) => <button style={{ backgroundColor: props.color }}>{props.children}</button>;
+export const MultilineDescriptionComponent: FC<PropsWithChildren<MultilineDescriptionProps>> = (props) => (
+  <button style={{ backgroundColor: props.color }}>{props.children}</button>
+);
 
 try {
     // @ts-ignore
@@ -205,7 +242,7 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > MultilinePropDescription.tsx has code block generated 1`] = `
-"import * as React from "react";
+"import type { FC, PropsWithChildren } from "react";
 
 interface MultilinePropDescriptionComponentProps {
   /**
@@ -219,7 +256,7 @@ interface MultilinePropDescriptionComponentProps {
 /**
  * A component with multiline prop description.
  */
-export const MultilinePropDescriptionComponent: React.FC<MultilinePropDescriptionComponentProps> = (
+export const MultilinePropDescriptionComponent: FC<PropsWithChildren<MultilinePropDescriptionComponentProps>> = (
   props
 ) => <button style={{ backgroundColor: props.color }}>{props.children}</button>;
 
@@ -233,17 +270,17 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > Simple.tsx has code block generated 1`] = `
-"import * as React from "react";
+"import type { FC, PropsWithChildren } from 'react';
 
 interface SimpleComponentProps {
   /** Button color. */
-  color: "blue" | "green";
+  color: 'blue' | 'green';
 }
 
 /**
  * A simple component.
  */
-export const SimpleComponent: React.FC<SimpleComponentProps> = (props) => (
+export const SimpleComponent: FC<PropsWithChildren<SimpleComponentProps>> = (props) => (
   <button style={{ backgroundColor: props.color }}>{props.children}</button>
 );
 
@@ -257,14 +294,14 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > TextOnlyComponent.tsx has code block generated 1`] = `
-"import * as React from "react";
+"import type { FC } from "react";
 
 /**
  * A component with only text content wrapped in a div.
  *
  * Ref: https://github.com/strothj/react-docgen-typescript-loader/issues/7
  */
-export const SimpleComponent: React.FC<{}> = () => (
+export const SimpleComponent: FC<{}> = () => (
   <div>Test only component</div>
 );
 
@@ -278,7 +315,7 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`generates value info for enums 1`] = `
-"import * as React from "react";
+"import type { FC, PropsWithChildren } from 'react';
 
 interface DefaultPropValueComponentProps {
   /**
@@ -286,7 +323,7 @@ interface DefaultPropValueComponentProps {
    *
    * @default blue
    **/
-  color: "blue" | "green";
+  color: 'blue' | 'green';
 
   /**
    * Button counter.
@@ -304,14 +341,16 @@ interface DefaultPropValueComponentProps {
 /**
  * Component with a prop with a default value.
  */
-export const DefaultPropValueComponent: React.FC<DefaultPropValueComponentProps> = (
-  props
-) => (
+const DefaultPropValueComponentImpl: FC<PropsWithChildren<DefaultPropValueComponentProps>> = (props) => (
   <button disabled={props.disabled} style={{ backgroundColor: props.color }}>
     {props.counter}
     {props.children}
   </button>
 );
+
+export const DefaultPropValueComponent = DefaultPropValueComponentImpl as typeof DefaultPropValueComponentImpl & {
+  defaultProps: Partial<DefaultPropValueComponentProps>;
+};
 
 DefaultPropValueComponent.defaultProps = {
   counter: 123,
@@ -323,7 +362,7 @@ try {
     // @ts-ignore
     DefaultPropValueComponent.displayName = "DefaultPropValueComponent";
     // @ts-ignore
-    DefaultPropValueComponent.__docgenInfo = { "description": "Component with a prop with a default value.", "displayName": "DefaultPropValueComponent", "props": { "color": { "defaultValue": { value: "blue" }, "description": "Button color.", "name": "color", "required": true, "type": { "name": "enum", "value": [{ "value": "\\"blue\\"" }, { "value": "\\"green\\"" }] } }, "counter": { "defaultValue": { value: 123 }, "description": "Button counter.", "name": "counter", "required": false, "type": { "name": "number" } }, "disabled": { "defaultValue": { value: false }, "description": "Button disabled.", "name": "disabled", "required": false, "type": { "name": "boolean" } }, "tabIndex": { "defaultValue": { value: -1 }, "description": "", "name": "tabIndex", "required": false, "type": { "name": "number" } } } };
+    DefaultPropValueComponent.__docgenInfo = { "description": "", "displayName": "DefaultPropValueComponent", "props": { "color": { "defaultValue": { value: "blue" }, "description": "Button color.", "name": "color", "required": true, "type": { "name": "enum", "value": [{ "value": "\\"blue\\"" }, { "value": "\\"green\\"" }] } }, "counter": { "defaultValue": { value: 123 }, "description": "Button counter.", "name": "counter", "required": false, "type": { "name": "number" } }, "disabled": { "defaultValue": { value: false }, "description": "Button disabled.", "name": "disabled", "required": false, "type": { "name": "boolean" } }, "tabIndex": { "defaultValue": { value: -1 }, "description": "", "name": "tabIndex", "required": false, "type": { "name": "number" } } } };
 }
 catch (__react_docgen_typescript_loader_error) { }"
 `;

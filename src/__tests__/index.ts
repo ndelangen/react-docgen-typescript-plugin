@@ -1,4 +1,6 @@
 import { DefaultPropValueComponent } from './__fixtures__/DefaultPropValue.tsx';
+// the edge case storybook needs
+import DirectDefaultExport from './__fixtures__/DirectDefaultExport.tsx';
 import { Button as DisplayNameComponent } from './__fixtures__/DisplayName.tsx';
 import { HyphenatedPropNameComponent } from './__fixtures__/HyphenatedPropName.tsx';
 import { MultiPropsComponent } from './__fixtures__/MultiProps.tsx';
@@ -14,4 +16,5 @@ export {
   MultilineDescriptionComponent,
   SimpleComponent,
   TextOnlyComponent,
+  DirectDefaultExport,
 };

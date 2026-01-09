@@ -32,9 +32,3 @@ export default function DefaultPropValueComponent(props: PropsWithChildren<Defau
     </button>
   );
 }
-
-DefaultPropValueComponent.defaultProps = {
-  counter: 123,
-  disabled: false,
-  tabIndex: -1,
-};
