@@ -1,6 +1,7 @@
-import path from "path";
-import ts from "typescript";
-import { ComponentDoc, PropItem } from "react-docgen-typescript";
+import path from 'node:path';
+
+import { ComponentDoc, PropItem } from 'react-docgen-typescript';
+import ts from 'typescript';
 
 export interface GeneratorOptions {
   filename: string;
@@ -36,7 +37,7 @@ function getComponentIdentifier(d: ComponentDoc): string {
 function insertTsIgnoreBeforeStatement(statement: ts.Statement): ts.Statement {
   ts.setSyntheticLeadingComments(statement, [
     {
-      text: " @ts-ignore", // Leading space is important here
+      text: ' @ts-ignore', // Leading space is important here
       kind: ts.SyntaxKind.SingleLineCommentTrivia,
       pos: -1,
       end: -1,
@@ -64,7 +65,7 @@ function setDisplayName(d: ComponentDoc): ts.Statement | null {
       ts.factory.createBinaryExpression(
         ts.factory.createPropertyAccessExpression(
           ts.factory.createIdentifier(getComponentIdentifier(d)),
-          ts.factory.createIdentifier("displayName"),
+          ts.factory.createIdentifier('displayName'),
         ),
         ts.SyntaxKind.EqualsToken,
         ts.factory.createStringLiteral(d.displayName),
@@ -89,17 +90,10 @@ function setDisplayName(d: ComponentDoc): ts.Statement | null {
  * @param prop Prop definition from `ComponentDoc.props`
  * @param options Generator options.
  */
-function createPropDefinition(
-  propName: string,
-  prop: PropItem,
-  options: GeneratorOptions,
-) {
+function createPropDefinition(propName: string, prop: PropItem, options: GeneratorOptions) {
   const createNumericDefaultValue = (value: number) => {
     if (value < 0) {
-      return ts.factory.createPrefixUnaryExpression(
-        ts.SyntaxKind.MinusToken,
-        ts.factory.createNumericLiteral(-value),
-      );
+      return ts.factory.createPrefixUnaryExpression(ts.SyntaxKind.MinusToken, ts.factory.createNumericLiteral(-value));
     }
 
     return ts.factory.createNumericLiteral(value);
@@ -117,26 +111,24 @@ function createPropDefinition(
    *
    * @param defaultValue Default prop value or null if not set.
    */
-  const setDefaultValue = (
-    defaultValue: { value: string | number | boolean } | null,
-  ) =>
+  const setDefaultValue = (defaultValue: { value: string | number | boolean } | null) =>
     ts.factory.createPropertyAssignment(
-      ts.factory.createStringLiteral("defaultValue"),
+      ts.factory.createStringLiteral('defaultValue'),
       // Use a more extensive check on defaultValue. Sometimes the parser
       // returns an empty object.
       defaultValue !== null &&
         defaultValue !== undefined &&
-        typeof defaultValue === "object" &&
-        "value" in defaultValue &&
-        (typeof defaultValue.value === "string" ||
-          typeof defaultValue.value === "number" ||
-          typeof defaultValue.value === "boolean")
+        typeof defaultValue === 'object' &&
+        'value' in defaultValue &&
+        (typeof defaultValue.value === 'string' ||
+          typeof defaultValue.value === 'number' ||
+          typeof defaultValue.value === 'boolean')
         ? ts.factory.createObjectLiteralExpression([
             ts.factory.createPropertyAssignment(
-              ts.factory.createIdentifier("value"),
-              typeof defaultValue.value === "string"
+              ts.factory.createIdentifier('value'),
+              typeof defaultValue.value === 'string'
                 ? ts.factory.createStringLiteral(defaultValue.value)
-                : typeof defaultValue.value === "number"
+                : typeof defaultValue.value === 'number'
                   ? createNumericDefaultValue(defaultValue.value)
                   : defaultValue.value
                     ? ts.factory.createTrue()
@@ -159,8 +151,7 @@ function createPropDefinition(
    * ```
    * @param description Prop description.
    */
-  const setDescription = (description: string) =>
-    setStringLiteralField("description", description);
+  const setDescription = (description: string) => setStringLiteralField('description', description);
 
   /**
    * ```
@@ -168,7 +159,7 @@ function createPropDefinition(
    * ```
    * @param name Prop name.
    */
-  const setName = (name: string) => setStringLiteralField("name", name);
+  const setName = (name: string) => setStringLiteralField('name', name);
 
   /**
    * ```
@@ -178,7 +169,7 @@ function createPropDefinition(
    */
   const setRequired = (required: boolean) =>
     ts.factory.createPropertyAssignment(
-      ts.factory.createStringLiteral("required"),
+      ts.factory.createStringLiteral('required'),
       required ? ts.factory.createTrue() : ts.factory.createFalse(),
     );
 
@@ -192,15 +183,12 @@ function createPropDefinition(
    * @param [typeValue] Prop value (for enums)
    */
   const setValue = (typeValue?: any[]) =>
-    Array.isArray(typeValue) &&
-    typeValue.every((value) => typeof value.value === "string")
+    Array.isArray(typeValue) && typeValue.every((value) => typeof value.value === 'string')
       ? ts.factory.createPropertyAssignment(
-          ts.factory.createStringLiteral("value"),
+          ts.factory.createStringLiteral('value'),
           ts.factory.createArrayLiteralExpression(
             typeValue.map((value) =>
-              ts.factory.createObjectLiteralExpression([
-                setStringLiteralField("value", value.value),
-              ]),
+              ts.factory.createObjectLiteralExpression([setStringLiteralField('value', value.value)]),
             ),
           ),
         )
@@ -214,7 +202,7 @@ function createPropDefinition(
    * @param [typeValue] Prop value (for enums)
    */
   const setType = (typeName: string, typeValue?: any[]) => {
-    const objectFields = [setStringLiteralField("name", typeName)];
+    const objectFields = [setStringLiteralField('name', typeName)];
     const valueField = setValue(typeValue);
 
     if (valueField) {
@@ -264,39 +252,33 @@ function insertDocgenIntoGlobalCollection(
   return insertTsIgnoreBeforeStatement(
     ts.factory.createIfStatement(
       ts.factory.createBinaryExpression(
-        ts.factory.createTypeOfExpression(
-          ts.factory.createIdentifier(docgenCollectionName),
-        ),
+        ts.factory.createTypeOfExpression(ts.factory.createIdentifier(docgenCollectionName)),
         ts.SyntaxKind.ExclamationEqualsEqualsToken,
-        ts.factory.createStringLiteral("undefined"),
+        ts.factory.createStringLiteral('undefined'),
       ),
       insertTsIgnoreBeforeStatement(
         ts.factory.createExpressionStatement(
           ts.factory.createBinaryExpression(
             ts.factory.createElementAccessExpression(
               ts.factory.createIdentifier(docgenCollectionName),
-              ts.factory.createStringLiteral(
-                `${relativeFilename}#${d.displayName}`,
-              ),
+              ts.factory.createStringLiteral(`${relativeFilename}#${d.displayName}`),
             ),
             ts.SyntaxKind.EqualsToken,
             ts.factory.createObjectLiteralExpression([
               ts.factory.createPropertyAssignment(
-                ts.factory.createIdentifier("docgenInfo"),
+                ts.factory.createIdentifier('docgenInfo'),
                 ts.factory.createPropertyAccessExpression(
                   ts.factory.createIdentifier(getComponentIdentifier(d)),
-                  ts.factory.createIdentifier("__docgenInfo"),
+                  ts.factory.createIdentifier('__docgenInfo'),
                 ),
               ),
               ts.factory.createPropertyAssignment(
-                ts.factory.createIdentifier("name"),
+                ts.factory.createIdentifier('name'),
                 ts.factory.createStringLiteral(d.displayName),
               ),
               ts.factory.createPropertyAssignment(
-                ts.factory.createIdentifier("path"),
-                ts.factory.createStringLiteral(
-                  `${relativeFilename}#${d.displayName}`,
-                ),
+                ts.factory.createIdentifier('path'),
+                ts.factory.createStringLiteral(`${relativeFilename}#${d.displayName}`),
               ),
             ]),
           ),
@@ -321,37 +303,32 @@ function insertDocgenIntoGlobalCollection(
  * @param d Component doc.
  * @param options Generator options.
  */
-function setComponentDocGen(
-  d: ComponentDoc,
-  options: GeneratorOptions,
-): ts.Statement {
+function setComponentDocGen(d: ComponentDoc, options: GeneratorOptions): ts.Statement {
   return insertTsIgnoreBeforeStatement(
     ts.factory.createExpressionStatement(
       ts.factory.createBinaryExpression(
         // SimpleComponent.__docgenInfo
         ts.factory.createPropertyAccessExpression(
           ts.factory.createIdentifier(getComponentIdentifier(d)),
-          ts.factory.createIdentifier("__docgenInfo"),
+          ts.factory.createIdentifier('__docgenInfo'),
         ),
         ts.SyntaxKind.EqualsToken,
         ts.factory.createObjectLiteralExpression([
           // SimpleComponent.__docgenInfo.description
           ts.factory.createPropertyAssignment(
-            ts.factory.createStringLiteral("description"),
+            ts.factory.createStringLiteral('description'),
             ts.factory.createStringLiteral(d.description),
           ),
           // SimpleComponent.__docgenInfo.displayName
           ts.factory.createPropertyAssignment(
-            ts.factory.createStringLiteral("displayName"),
+            ts.factory.createStringLiteral('displayName'),
             ts.factory.createStringLiteral(d.displayName),
           ),
           // SimpleComponent.__docgenInfo.props
           ts.factory.createPropertyAssignment(
-            ts.factory.createStringLiteral("props"),
+            ts.factory.createStringLiteral('props'),
             ts.factory.createObjectLiteralExpression(
-              Object.entries(d.props).map(([propName, prop]) =>
-                createPropDefinition(propName, prop, options),
-              ),
+              Object.entries(d.props).map(([propName, prop]) => createPropDefinition(propName, prop, options)),
             ),
           ),
         ]),
@@ -361,23 +338,15 @@ function setComponentDocGen(
 }
 
 export function generateDocgenCodeBlock(options: GeneratorOptions): string {
-  const sourceFile = ts.createSourceFile(
-    options.filename,
-    options.source,
-    ts.ScriptTarget.ESNext,
-  );
+  const sourceFile = ts.createSourceFile(options.filename, options.source, ts.ScriptTarget.ESNext);
 
-  const relativeFilename = path
-    .relative("./", path.resolve("./", options.filename))
-    .replace(/\\/g, "/");
+  const relativeFilename = path.relative('./', path.resolve('./', options.filename)).replace(/\\/g, '/');
 
   const wrapInTryStatement = (statements: ts.Statement[]): ts.TryStatement =>
     ts.factory.createTryStatement(
       ts.factory.createBlock(statements, true),
       ts.factory.createCatchClause(
-        ts.factory.createVariableDeclaration(
-          ts.factory.createIdentifier("__react_docgen_typescript_loader_error"),
-        ),
+        ts.factory.createVariableDeclaration(ts.factory.createIdentifier('__react_docgen_typescript_loader_error')),
         ts.factory.createBlock([]),
       ),
       undefined,
@@ -388,21 +357,15 @@ export function generateDocgenCodeBlock(options: GeneratorOptions): string {
       [
         options.setDisplayName ? setDisplayName(d) : null,
         setComponentDocGen(d, options),
-        options.docgenCollectionName === null ||
-        options.docgenCollectionName === undefined
+        options.docgenCollectionName === null || options.docgenCollectionName === undefined
           ? null
-          : insertDocgenIntoGlobalCollection(
-              d,
-              options.docgenCollectionName,
-              relativeFilename,
-            ),
+          : insertDocgenIntoGlobalCollection(d, options.docgenCollectionName, relativeFilename),
       ].filter((s) => s !== null) as ts.Statement[],
     ),
   );
 
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
-  const printNode = (sourceNode: ts.Node) =>
-    printer.printNode(ts.EmitHint.Unspecified, sourceNode, sourceFile);
+  const printNode = (sourceNode: ts.Node) => printer.printNode(ts.EmitHint.Unspecified, sourceNode, sourceFile);
 
   // Concat original source code with code from generated code blocks.
   const result = codeBlocks.reduce(

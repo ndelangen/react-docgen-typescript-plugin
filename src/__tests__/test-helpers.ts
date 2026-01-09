@@ -1,24 +1,26 @@
-import path from "node:path";
-import webpack from "webpack";
-import ReactDocgenTypeScriptPlugin from "../plugin";
+import path from 'node:path';
+
+import webpack from 'webpack';
+
+import ReactDocgenTypeScriptPlugin from '../plugin';
 
 export function compile(plugin: ReactDocgenTypeScriptPlugin): Promise<string> {
   return new Promise((resolve, reject) => {
     webpack({
-      mode: "production",
-      entry: { main: "./src/__tests__/index.ts" },
+      mode: 'production',
+      entry: { main: './src/__tests__/index.ts' },
       output: {
-        path: path.join(process.cwd(), "test-output"),
+        path: path.join(process.cwd(), 'test-output'),
         module: true,
-        libraryTarget: "module",
+        libraryTarget: 'module',
       },
       experiments: {
         outputModule: true,
       },
       externals: {
-        tslib: "tslib",
-        react: "react",
-        "react-dom": "react-dom",
+        tslib: 'tslib',
+        react: 'react',
+        'react-dom': 'react-dom',
       },
       optimization: {
         minimize: false,
@@ -28,7 +30,7 @@ export function compile(plugin: ReactDocgenTypeScriptPlugin): Promise<string> {
         rules: [
           {
             test: /\.tsx?$/,
-            loader: "ts-loader",
+            loader: 'ts-loader',
             options: {
               transpileOnly: true,
             },
@@ -41,10 +43,10 @@ export function compile(plugin: ReactDocgenTypeScriptPlugin): Promise<string> {
       }
 
       if (stats?.hasErrors()) {
-        return reject(stats.toString("errors-only"));
+        return reject(stats.toString('errors-only'));
       }
 
-      return resolve(stats?.toString() ?? "");
+      return resolve(stats?.toString() ?? '');
     });
   });
 }

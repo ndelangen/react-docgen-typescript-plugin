@@ -1,5 +1,5 @@
 // @ts-expect-error (this is the output of the webpack build, there are no types)
-import * as Tests from "../../test-output/main.mjs";
+import * as Tests from '../../test-output/main.mjs';
 
 /** This file is to help test the actual output of webpack build
  *
@@ -12,9 +12,7 @@ import * as Tests from "../../test-output/main.mjs";
 
 console.log(
   JSON.stringify(
-    Object.entries(
-      Tests as Record<string, { displayName: string; __docgenInfo: any }>,
-    ).map(([key, value]) => ({
+    Object.entries(Tests as Record<string, { displayName: string; __docgenInfo: any }>).map(([key, value]) => ({
       name: key,
       displayName: value.displayName,
       __docgenInfo: value.__docgenInfo,

@@ -1,12 +1,10 @@
-import * as webpack from "webpack";
-
+import * as webpack from 'webpack';
 // eslint-disable-next-line
 // @ts-ignore: What's the right way to refer to this one?
-import makeSerializable from "webpack/lib/util/makeSerializable.js";
-
+import NullDependency from 'webpack/lib/dependencies/NullDependency.js';
 // eslint-disable-next-line
 // @ts-ignore: What's the right way to refer to this one?
-import NullDependency from "webpack/lib/dependencies/NullDependency.js";
+import makeSerializable from 'webpack/lib/util/makeSerializable.js';
 
 // This won't be needed when only webpack 5+ can be supported. Patching for now.
 type Context = { write: (a: string) => void; read: () => string };
@@ -21,14 +19,14 @@ class DocGenDependency extends NullDependency {
   }
 
   get type(): string {
-    return "docgen";
+    return 'docgen';
   }
 
   getModuleEvaluationSideEffectsState(): boolean {
     return false;
   }
 
-  updateHash: webpack.dependencies.NullDependency["updateHash"] = (hash) => {
+  updateHash: webpack.dependencies.NullDependency['updateHash'] = (hash) => {
     hash.update(this.codeBlock);
   };
 
@@ -43,23 +41,12 @@ class DocGenDependency extends NullDependency {
   }
 }
 
-makeSerializable(
-  DocGenDependency,
-  "react-docgen-typescript-plugin/dist/dependency",
-);
+makeSerializable(DocGenDependency, 'react-docgen-typescript-plugin/dist/dependency');
 
-type NullDependencyTemplateType = InstanceType<
-  typeof webpack.dependencies.NullDependency.Template
->;
-class DocGenTemplate
-  extends NullDependency.Template
-  implements NullDependencyTemplateType
-{
+type NullDependencyTemplateType = InstanceType<typeof webpack.dependencies.NullDependency.Template>;
+class DocGenTemplate extends NullDependency.Template implements NullDependencyTemplateType {
   // @ts-expect-error: Webpack 4 type
-  apply: NullDependencyTemplateType["apply"] = (
-    dependency: DocGenDependency,
-    source,
-  ) => {
+  apply: NullDependencyTemplateType['apply'] = (dependency: DocGenDependency, source) => {
     if (dependency.codeBlock) {
       // Insert to the end
       source.insert(Infinity, dependency.codeBlock);

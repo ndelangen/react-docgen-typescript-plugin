@@ -29,12 +29,13 @@
   ],
   "dependencies": {
     "@types/find-cache-dir": "^5.0.2",
+    "@types/flat-cache": "^2.0.2",
     "find-cache-dir": "^6.0.0",
-    "flat-cache": "^6.1.19",
-    "@types/flat-cache": "^2.0.2"
+    "flat-cache": "^6.1.19"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/debug": "^4.1.12",
     "@types/micromatch": "^4.0.10",
     "@types/node": "^25.0.3",

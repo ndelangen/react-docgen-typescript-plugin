@@ -1,26 +1,21 @@
-import path from "node:path";
-import { exec, execSync } from "node:child_process";
-import { createRequire } from "node:module";
+import { exec } from 'node:child_process';
 
-import webpack from "webpack";
+import { expect, test } from 'vitest';
 
-import ReactDocgenTypeScriptPlugin from "../plugin";
-import { test, expect } from "vitest";
-import { compile } from "./test-helpers";
+import ReactDocgenTypeScriptPlugin from '../plugin';
+import { compile } from './test-helpers';
 
-test("source", async () => {
+test('source', async () => {
   await compile(new ReactDocgenTypeScriptPlugin());
 
-  const process = exec(
-    "node --experimental-strip-types src/__tests__/check.ts"
-  );
+  const process = exec('node --experimental-strip-types src/__tests__/check.ts');
 
   const out = await new Promise<string>((resolve) => {
-    let data = "";
-    process.stdout?.on("data", (d) => {
-      data += d?.toString() ?? "";
+    let data = '';
+    process.stdout?.on('data', (d) => {
+      data += d?.toString() ?? '';
     });
-    process.stdout?.on("end", () => {
+    process.stdout?.on('end', () => {
       resolve(data);
     });
   });

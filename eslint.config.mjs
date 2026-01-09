@@ -1,10 +1,11 @@
-import js from "@eslint/js";
-import prettier from "eslint-config-prettier";
-import tseslint from "typescript-eslint";
-import vitest from "eslint-plugin-vitest";
-import importPlugin from "eslint-plugin-import";
-import jsdoc from "eslint-plugin-jsdoc";
-import globals from "globals";
+import js from '@eslint/js';
+import prettier from 'eslint-config-prettier';
+import importPlugin from 'eslint-plugin-import';
+import jsdoc from 'eslint-plugin-jsdoc';
+import prettierPlugin from 'eslint-plugin-prettier';
+import vitest from 'eslint-plugin-vitest';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   // Base JavaScript recommended rules
@@ -23,74 +24,166 @@ export default tseslint.config(
         ...globals.node,
         ...globals.vitest,
       },
-      ecmaVersion: "latest",
-      sourceType: "module",
+      ecmaVersion: 'latest',
+      sourceType: 'module',
     },
   },
 
   // TypeScript files configuration
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: "./tsconfig.json",
-        sourceType: "module",
+        project: './tsconfig.json',
+        sourceType: 'module',
       },
     },
     plugins: {
-      "@typescript-eslint": tseslint.plugin,
+      '@typescript-eslint': tseslint.plugin,
       import: importPlugin,
       jsdoc: jsdoc,
+      prettier: prettierPlugin,
     },
     rules: {
+      // Prettier
+      'prettier/prettier': 'error',
+
       // TypeScript-specific rule overrides
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "error",
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
         {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
         },
       ],
 
       // Import rules
-      "import/no-unresolved": "off",
-      "import/extensions": "off",
+      'import/no-unresolved': 'off',
+      'import/extensions': 'off',
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '^assert$',
+                '^buffer$',
+                '^child_process$',
+                '^cluster$',
+                '^console$',
+                '^constants$',
+                '^crypto$',
+                '^dgram$',
+                '^dns$',
+                '^domain$',
+                '^events$',
+                '^fs$',
+                '^http$',
+                '^https$',
+                '^module$',
+                '^net$',
+                '^os$',
+                '^path$',
+                '^punycode$',
+                '^querystring$',
+                '^readline$',
+                '^repl$',
+                '^stream$',
+                '^string_decoder$',
+                '^sys$',
+                '^timers$',
+                '^tls$',
+                '^tty$',
+                '^url$',
+                '^util$',
+                '^vm$',
+                '^zlib$',
+              ],
+              message:
+                "Node.js built-in modules must be imported with the 'node:' prefix (e.g., 'node:fs' instead of 'fs').",
+            },
+          ],
+        },
+      ],
 
       // General rules
-      complexity: "off",
-      "class-methods-use-this": "off",
+      complexity: 'off',
+      'class-methods-use-this': 'off',
     },
   },
 
   // JavaScript files configuration
   {
-    files: ["**/*.js", "**/*.mjs"],
+    files: ['**/*.js', '**/*.mjs'],
     languageOptions: {
       parserOptions: {
-        ecmaVersion: "latest",
-        sourceType: "module",
+        ecmaVersion: 'latest',
+        sourceType: 'module',
       },
     },
     plugins: {
       import: importPlugin,
+      '@typescript-eslint': tseslint.plugin,
+      prettier: prettierPlugin,
     },
     rules: {
-      "import/no-unresolved": "off",
-      "import/extensions": "off",
+      'prettier/prettier': 'error',
+      'import/no-unresolved': 'off',
+      'import/extensions': 'off',
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '^assert$',
+                '^buffer$',
+                '^child_process$',
+                '^cluster$',
+                '^console$',
+                '^constants$',
+                '^crypto$',
+                '^dgram$',
+                '^dns$',
+                '^domain$',
+                '^events$',
+                '^fs$',
+                '^http$',
+                '^https$',
+                '^module$',
+                '^net$',
+                '^os$',
+                '^path$',
+                '^punycode$',
+                '^querystring$',
+                '^readline$',
+                '^repl$',
+                '^stream$',
+                '^string_decoder$',
+                '^sys$',
+                '^timers$',
+                '^tls$',
+                '^tty$',
+                '^url$',
+                '^util$',
+                '^vm$',
+                '^zlib$',
+              ],
+              message:
+                "Node.js built-in modules must be imported with the 'node:' prefix (e.g., 'node:fs' instead of 'fs').",
+            },
+          ],
+        },
+      ],
     },
   },
 
   // Vitest test files configuration
   {
-    files: [
-      "**/*.test.ts",
-      "**/*.test.tsx",
-      "**/*.test.js",
-      "**/__tests__/**/*",
-    ],
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js', '**/__tests__/**/*'],
     plugins: {
       vitest: vitest,
     },
@@ -106,11 +199,6 @@ export default tseslint.config(
 
   // Ignore patterns
   {
-    ignores: [
-      "vitest.config.ts",
-      "**/__fixtures__/**",
-      "dist/**",
-      "node_modules/**",
-    ],
+    ignores: ['vitest.config.ts', '**/__fixtures__/**', 'dist/**', 'node_modules/**'],
   },
 );
