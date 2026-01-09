@@ -2,8 +2,11 @@
   "include": ["src/**/*", "typings/**/*"],
 
   "compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "target": "es2020",
+    "module": "esnext",
+    "moduleResolution": "Bundler",
     "lib": ["esnext"],
     "outDir": "./dist",
     "rootDir": "./src",
