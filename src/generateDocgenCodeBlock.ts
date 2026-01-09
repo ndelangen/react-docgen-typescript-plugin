@@ -13,12 +13,12 @@ export interface GeneratorOptions {
 
 /**
  * Gets the identifier name for the component.
- * 
+ *
  * If the component has a displayName that differs from its
  * identifier, this will return the identifier.
  */
 function getComponentIdentifier(d: ComponentDoc): string {
-  return d.expression?.getName() || d.displayName
+  return d.expression?.getName() || d.displayName;
 }
 
 /**
@@ -56,7 +56,7 @@ function setDisplayName(d: ComponentDoc): ts.Statement | null {
   // If the expression name doesn't match the display name,
   // then we know the component has already set a displayName
   if (d.expression && d.expression.getName() !== d.displayName) {
-    return null
+    return null;
   }
 
   return insertTsIgnoreBeforeStatement(
@@ -64,12 +64,12 @@ function setDisplayName(d: ComponentDoc): ts.Statement | null {
       ts.factory.createBinaryExpression(
         ts.factory.createPropertyAccessExpression(
           ts.factory.createIdentifier(getComponentIdentifier(d)),
-          ts.factory.createIdentifier("displayName")
+          ts.factory.createIdentifier("displayName"),
         ),
         ts.SyntaxKind.EqualsToken,
-        ts.factory.createStringLiteral(d.displayName)
-      )
-    )
+        ts.factory.createStringLiteral(d.displayName),
+      ),
+    ),
   );
 }
 
@@ -92,18 +92,18 @@ function setDisplayName(d: ComponentDoc): ts.Statement | null {
 function createPropDefinition(
   propName: string,
   prop: PropItem,
-  options: GeneratorOptions
+  options: GeneratorOptions,
 ) {
-   const createNumericDefaultValue = (value: number) => {
-       if (value < 0) {
-           return ts.factory.createPrefixUnaryExpression(
-               ts.SyntaxKind.MinusToken,
-               ts.factory.createNumericLiteral(-value),
-           );
-       }
+  const createNumericDefaultValue = (value: number) => {
+    if (value < 0) {
+      return ts.factory.createPrefixUnaryExpression(
+        ts.SyntaxKind.MinusToken,
+        ts.factory.createNumericLiteral(-value),
+      );
+    }
 
-       return ts.factory.createNumericLiteral(value);
-   };
+    return ts.factory.createNumericLiteral(value);
+  };
 
   /**
    * Set default prop value.
@@ -118,7 +118,7 @@ function createPropDefinition(
    * @param defaultValue Default prop value or null if not set.
    */
   const setDefaultValue = (
-    defaultValue: { value: string | number | boolean } | null
+    defaultValue: { value: string | number | boolean } | null,
   ) =>
     ts.factory.createPropertyAssignment(
       ts.factory.createStringLiteral("defaultValue"),
@@ -134,25 +134,23 @@ function createPropDefinition(
         ? ts.factory.createObjectLiteralExpression([
             ts.factory.createPropertyAssignment(
               ts.factory.createIdentifier("value"),
-              // eslint-disable-next-line no-nested-ternary
               typeof defaultValue.value === "string"
                 ? ts.factory.createStringLiteral(defaultValue.value)
-                : // eslint-disable-next-line no-nested-ternary
-                typeof defaultValue.value === "number"
-                ? createNumericDefaultValue(defaultValue.value)
-                : defaultValue.value
-                ? ts.factory.createTrue()
-                : ts.factory.createFalse()
+                : typeof defaultValue.value === "number"
+                  ? createNumericDefaultValue(defaultValue.value)
+                  : defaultValue.value
+                    ? ts.factory.createTrue()
+                    : ts.factory.createFalse(),
             ),
           ])
-        : ts.factory.createNull()
+        : ts.factory.createNull(),
     );
 
   /** Set a property with a string value */
   const setStringLiteralField = (fieldName: string, fieldValue: string) =>
     ts.factory.createPropertyAssignment(
       ts.factory.createStringLiteral(fieldName),
-      ts.factory.createStringLiteral(fieldValue)
+      ts.factory.createStringLiteral(fieldValue),
     );
 
   /**
@@ -181,7 +179,7 @@ function createPropDefinition(
   const setRequired = (required: boolean) =>
     ts.factory.createPropertyAssignment(
       ts.factory.createStringLiteral("required"),
-      required ? ts.factory.createTrue() : ts.factory.createFalse()
+      required ? ts.factory.createTrue() : ts.factory.createFalse(),
     );
 
   /**
@@ -202,9 +200,9 @@ function createPropDefinition(
             typeValue.map((value) =>
               ts.factory.createObjectLiteralExpression([
                 setStringLiteralField("value", value.value),
-              ])
-            )
-          )
+              ]),
+            ),
+          ),
         )
       : undefined;
 
@@ -225,7 +223,7 @@ function createPropDefinition(
 
     return ts.factory.createPropertyAssignment(
       ts.factory.createStringLiteral(options.typePropName),
-      ts.factory.createObjectLiteralExpression(objectFields)
+      ts.factory.createObjectLiteralExpression(objectFields),
     );
   };
 
@@ -237,7 +235,7 @@ function createPropDefinition(
       setName(prop.name),
       setRequired(prop.required),
       setType(prop.type.name, prop.type.value),
-    ])
+    ]),
   );
 }
 
@@ -261,16 +259,16 @@ function createPropDefinition(
 function insertDocgenIntoGlobalCollection(
   d: ComponentDoc,
   docgenCollectionName: string,
-  relativeFilename: string
+  relativeFilename: string,
 ): ts.Statement {
   return insertTsIgnoreBeforeStatement(
     ts.factory.createIfStatement(
       ts.factory.createBinaryExpression(
         ts.factory.createTypeOfExpression(
-          ts.factory.createIdentifier(docgenCollectionName)
+          ts.factory.createIdentifier(docgenCollectionName),
         ),
         ts.SyntaxKind.ExclamationEqualsEqualsToken,
-        ts.factory.createStringLiteral("undefined")
+        ts.factory.createStringLiteral("undefined"),
       ),
       insertTsIgnoreBeforeStatement(
         ts.factory.createExpressionStatement(
@@ -278,8 +276,8 @@ function insertDocgenIntoGlobalCollection(
             ts.factory.createElementAccessExpression(
               ts.factory.createIdentifier(docgenCollectionName),
               ts.factory.createStringLiteral(
-                `${relativeFilename}#${d.displayName}`
-              )
+                `${relativeFilename}#${d.displayName}`,
+              ),
             ),
             ts.SyntaxKind.EqualsToken,
             ts.factory.createObjectLiteralExpression([
@@ -287,24 +285,24 @@ function insertDocgenIntoGlobalCollection(
                 ts.factory.createIdentifier("docgenInfo"),
                 ts.factory.createPropertyAccessExpression(
                   ts.factory.createIdentifier(getComponentIdentifier(d)),
-                  ts.factory.createIdentifier("__docgenInfo")
-                )
+                  ts.factory.createIdentifier("__docgenInfo"),
+                ),
               ),
               ts.factory.createPropertyAssignment(
                 ts.factory.createIdentifier("name"),
-                ts.factory.createStringLiteral(d.displayName)
+                ts.factory.createStringLiteral(d.displayName),
               ),
               ts.factory.createPropertyAssignment(
                 ts.factory.createIdentifier("path"),
                 ts.factory.createStringLiteral(
-                  `${relativeFilename}#${d.displayName}`
-                )
+                  `${relativeFilename}#${d.displayName}`,
+                ),
               ),
-            ])
-          )
-        )
-      )
-    )
+            ]),
+          ),
+        ),
+      ),
+    ),
   );
 }
 
@@ -325,7 +323,7 @@ function insertDocgenIntoGlobalCollection(
  */
 function setComponentDocGen(
   d: ComponentDoc,
-  options: GeneratorOptions
+  options: GeneratorOptions,
 ): ts.Statement {
   return insertTsIgnoreBeforeStatement(
     ts.factory.createExpressionStatement(
@@ -333,32 +331,32 @@ function setComponentDocGen(
         // SimpleComponent.__docgenInfo
         ts.factory.createPropertyAccessExpression(
           ts.factory.createIdentifier(getComponentIdentifier(d)),
-          ts.factory.createIdentifier("__docgenInfo")
+          ts.factory.createIdentifier("__docgenInfo"),
         ),
         ts.SyntaxKind.EqualsToken,
         ts.factory.createObjectLiteralExpression([
           // SimpleComponent.__docgenInfo.description
           ts.factory.createPropertyAssignment(
             ts.factory.createStringLiteral("description"),
-            ts.factory.createStringLiteral(d.description)
+            ts.factory.createStringLiteral(d.description),
           ),
           // SimpleComponent.__docgenInfo.displayName
           ts.factory.createPropertyAssignment(
             ts.factory.createStringLiteral("displayName"),
-            ts.factory.createStringLiteral(d.displayName)
+            ts.factory.createStringLiteral(d.displayName),
           ),
           // SimpleComponent.__docgenInfo.props
           ts.factory.createPropertyAssignment(
             ts.factory.createStringLiteral("props"),
             ts.factory.createObjectLiteralExpression(
               Object.entries(d.props).map(([propName, prop]) =>
-                createPropDefinition(propName, prop, options)
-              )
-            )
+                createPropDefinition(propName, prop, options),
+              ),
+            ),
           ),
-        ])
-      )
-    )
+        ]),
+      ),
+    ),
   );
 }
 
@@ -366,7 +364,7 @@ export function generateDocgenCodeBlock(options: GeneratorOptions): string {
   const sourceFile = ts.createSourceFile(
     options.filename,
     options.source,
-    ts.ScriptTarget.ESNext
+    ts.ScriptTarget.ESNext,
   );
 
   const relativeFilename = path
@@ -378,11 +376,11 @@ export function generateDocgenCodeBlock(options: GeneratorOptions): string {
       ts.factory.createBlock(statements, true),
       ts.factory.createCatchClause(
         ts.factory.createVariableDeclaration(
-          ts.factory.createIdentifier("__react_docgen_typescript_loader_error")
+          ts.factory.createIdentifier("__react_docgen_typescript_loader_error"),
         ),
-        ts.factory.createBlock([])
+        ts.factory.createBlock([]),
       ),
-      undefined
+      undefined,
     );
 
   const codeBlocks = options.componentDocs.map((d) =>
@@ -396,10 +394,10 @@ export function generateDocgenCodeBlock(options: GeneratorOptions): string {
           : insertDocgenIntoGlobalCollection(
               d,
               options.docgenCollectionName,
-              relativeFilename
+              relativeFilename,
             ),
-      ].filter((s) => s !== null) as ts.Statement[]
-    )
+      ].filter((s) => s !== null) as ts.Statement[],
+    ),
   );
 
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
@@ -413,7 +411,7 @@ export function generateDocgenCodeBlock(options: GeneratorOptions): string {
     // Use original source text rather than using printNode on the parsed form
     // to prevent issue where literals are stripped within components.
     // Ref: https://github.com/strothj/react-docgen-typescript-loader/issues/7
-    options.source
+    options.source,
   );
 
   return result;

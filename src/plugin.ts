@@ -47,9 +47,9 @@ function getTSConfigFile(tsconfigPath: string): ts.ParsedCommandLine {
       ts.sys,
       basePath,
       {},
-      tsconfigPath
+      tsconfigPath,
     );
-  } catch (error) {
+  } catch {
     return {} as ts.ParsedCommandLine;
   }
 }
@@ -73,7 +73,7 @@ function processModule(
   parser: docGen.FileParser,
   webpackModule: webpack.Module,
   tsProgram: ts.Program,
-  loaderOptions: Required<LoaderOptions>
+  loaderOptions: Required<LoaderOptions>,
 ) {
   if (!webpackModule) {
     return;
@@ -81,31 +81,25 @@ function processModule(
 
   const hash = crypto
     .createHash("sha1")
-    // eslint-disable-next-line
-    // @ts-ignore
-    // eslint-disable-next-line
+    // @ts-expect-error: (?)
     .update(webpackModule._source._value)
     .digest("hex");
   const cached = cache.getKey(hash);
 
   if (cached) {
-    // eslint-disable-next-line
-    // @ts-ignore
+    // @ts-expect-error: (?)
     debugInclude(`Got cached docgen for "${webpackModule.request}"`);
-    // eslint-disable-next-line
-    // @ts-ignore
-    // eslint-disable-next-line
+    // @ts-expect-error: (?)
     webpackModule._source._value = cached;
     return;
   }
 
-  // eslint-disable-next-line
-  // @ts-ignore: Webpack 4 type
+  // @ts-expect-error: (Webpack 4 type)
   const { userRequest } = webpackModule;
 
   const componentDocs = parser.parseWithProgramProvider(
     userRequest,
-    () => tsProgram
+    () => tsProgram,
   );
 
   if (!componentDocs.length) {
@@ -119,16 +113,12 @@ function processModule(
     ...loaderOptions,
   }).substring(userRequest.length);
 
-  // eslint-disable-next-line
-  // @ts-ignore: Webpack 4 type
-  // eslint-disable-next-line
+  // @ts-expect-error: (Webpack 4 type)
   let sourceWithDocs = webpackModule._source._value;
 
   sourceWithDocs += `\n${docs}\n`;
 
-  // eslint-disable-next-line
-  // @ts-ignore: Webpack 4 type
-  // eslint-disable-next-line
+  // @ts-expect-error: (Webpack 4 type)
   webpackModule._source._value = sourceWithDocs;
 }
 
@@ -161,14 +151,11 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
 
   applyWebpack5(compiler: webpack.Compiler): void {
     const pluginName = "DocGenPlugin";
-    const {
-      docgenOptions,
-      compilerOptions,
-      generateOptions,
-    } = this.getOptions();
+    const { docgenOptions, compilerOptions, generateOptions } =
+      this.getOptions();
     const docGenParser = docGen.withCompilerOptions(
       compilerOptions,
-      docgenOptions
+      docgenOptions,
     );
     const { exclude = [], include = ["**/**.tsx"] } = this.options;
     const isExcluded = matchGlob(exclude);
@@ -189,7 +176,7 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
           DocGenDependency,
           // eslint-disable-next-line
           // @ts-ignore: Webpack 4 type
-          new DocGenDependency.Template()
+          new DocGenDependency.Template(),
         );
 
         compilation.hooks.seal.tap(pluginName, () => {
@@ -222,21 +209,21 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
             // @ts-ignore: Webpack 4 type
             if (!module.rawRequest) {
               debugExclude(
-                `Ignoring module without "rawRequest": ${nameForCondition}`
+                `Ignoring module without "rawRequest": ${nameForCondition}`,
               );
               return;
             }
 
             if (isExcluded(nameForCondition)) {
               debugExclude(
-                `Module not matched in "exclude": ${nameForCondition}`
+                `Module not matched in "exclude": ${nameForCondition}`,
               );
               return;
             }
 
             if (!isIncluded(nameForCondition)) {
               debugExclude(
-                `Module not matched in "include": ${nameForCondition}`
+                `Module not matched in "include": ${nameForCondition}`,
               );
               return;
             }
@@ -247,7 +234,7 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
           // 2. Create a ts program with the modules
           const tsProgram = ts.createProgram(
             modulesToProcess.map(([name]) => name),
-            compilerOptions
+            compilerOptions,
           );
 
           // 3. Process and parse each module and add the type information
@@ -268,15 +255,15 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
                   source: name,
                   componentDocs: docGenParser.parseWithProgramProvider(
                     name,
-                    () => tsProgram
+                    () => tsProgram,
                   ),
                   ...generateOptions,
-                }).substring(name.length)
-              )
+                }).substring(name.length),
+              ),
             );
           });
         });
-      }
+      },
     );
   }
 
@@ -316,7 +303,7 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
             debugExclude(
               // eslint-disable-next-line
               // @ts-ignore: Webpack 4 type
-              `Ignoring module without "rawRequest": ${module.userRequest}`
+              `Ignoring module without "rawRequest": ${module.userRequest}`,
             );
             return;
           }
@@ -327,7 +314,7 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
             debugExclude(
               // eslint-disable-next-line
               // @ts-ignore: Webpack 4 type
-              `Module not matched in "exclude": ${module.userRequest}`
+              `Module not matched in "exclude": ${module.userRequest}`,
             );
             return;
           }
@@ -338,7 +325,7 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
             debugExclude(
               // eslint-disable-next-line
               // @ts-ignore: Webpack 4 type
-              `Module not matched in "include": ${module.userRequest}`
+              `Module not matched in "include": ${module.userRequest}`,
             );
             return;
           }
@@ -353,7 +340,7 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
           // eslint-disable-next-line
           // @ts-ignore: Webpack 4 type
           modulesToProcess.map((v) => v.userRequest),
-          compilerOptions
+          compilerOptions,
         );
 
         modulesToProcess.forEach((m) =>
@@ -361,7 +348,7 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
             docgenCollectionName: "STORYBOOK_REACT_CLASSES",
             setDisplayName: true,
             typePropName: "type",
-          })
+          }),
         );
 
         cache.save();

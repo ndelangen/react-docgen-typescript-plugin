@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 // @ts-expect-error (this is the output of the webpack build, there are no types)
 import * as Tests from "../../test-output/main.mjs";
 
