@@ -11,7 +11,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup src/index.ts",
+    "build": "tsup src/index.ts --dts",
     "start": "yarn build --watch",
     "lint": "eslint src",
     "test": "vitest",
