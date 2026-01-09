@@ -5,7 +5,7 @@ import * as docGen from "react-docgen-typescript";
 import { matcher } from "micromatch";
 import * as webpack from "webpack";
 import findCacheDir from "find-cache-dir";
-import flatCache from "flat-cache";
+import { FlatCache } from "flat-cache";
 import crypto from "crypto";
 
 import { DocGenDependency } from "./dependency";
@@ -67,7 +67,8 @@ const matchGlob = (globs?: string[]) => {
 // The cache is used only with webpack 4 for now as webpack 5 comes with caching of its own
 const cacheId = "ts-docgen";
 const cacheDir = findCacheDir({ name: cacheId });
-const cache = flatCache.load(cacheId, cacheDir);
+const cache = new FlatCache();
+const loaded = cache.load(cacheId, cacheDir);
 
 /** Run the docgen parser and inject the result into the output */
 /** This is used for webpack 4 or earlier */
@@ -86,7 +87,7 @@ function processModule(
     // @ts-expect-error: (?)
     .update(webpackModule._source._value)
     .digest("hex");
-  const cached = cache.getKey(hash);
+  const cached = cache.get(hash);
 
   if (cached) {
     // @ts-expect-error: (?)

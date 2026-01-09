@@ -1,18 +1,20 @@
-import path from "node:path";
 import { exec, execSync } from "node:child_process";
 import { createRequire } from "node:module";
 
-import webpack from "webpack";
-
-import ReactDocgenTypeScriptPlugin from "../plugin";
 import { test, expect } from "vitest";
 import { compile } from "./test-helpers";
 
-test("source", async () => {
-  await compile(new ReactDocgenTypeScriptPlugin());
+const require = createRequire(import.meta.url);
+
+test("dist", async () => {
+  execSync("npm run build");
+
+  await compile(
+    new (require(import.meta.dirname + "/../../dist/index").default)(),
+  );
 
   const process = exec(
-    "node --experimental-strip-types src/__tests__/check.ts"
+    "node --experimental-strip-types src/__tests__/check.ts",
   );
 
   const out = await new Promise<string>((resolve) => {
