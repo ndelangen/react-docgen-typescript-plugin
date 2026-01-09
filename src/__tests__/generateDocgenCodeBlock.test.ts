@@ -5,6 +5,7 @@ import {
   generateDocgenCodeBlock,
   GeneratorOptions,
 } from "../generateDocgenCodeBlock";
+import { describe, it, expect } from "vitest";
 
 const defaultParserOptions = { shouldIncludeExpression: true };
 
@@ -30,8 +31,10 @@ function loadFixtureTests(): GeneratorOptions[] {
 }
 
 const fixtureTests: GeneratorOptions[] = loadFixtureTests();
-const simpleFixture = fixtureTests.find((f) => f.filename === "Simple.tsx")!
-const displayNameFixture = fixtureTests.find((f) => f.filename === "DisplayName.tsx")!
+const simpleFixture = fixtureTests.find((f) => f.filename === "Simple.tsx")!;
+const displayNameFixture = fixtureTests.find(
+  (f) => f.filename === "DisplayName.tsx",
+)!;
 
 describe("component fixture", () => {
   fixtureTests.forEach((generatorOptions) => {
@@ -46,7 +49,7 @@ it("adds component to docgen collection", () => {
     generateDocgenCodeBlock({
       ...simpleFixture,
       docgenCollectionName: "STORYBOOK_REACT_CLASSES",
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -55,7 +58,7 @@ it("adds component with display name to docgen collection", () => {
     generateDocgenCodeBlock({
       ...displayNameFixture,
       docgenCollectionName: "STORYBOOK_REACT_CLASSES",
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -65,7 +68,7 @@ it("generates value info for enums", () => {
       getGeneratorOptions({
         ...defaultParserOptions,
         shouldExtractLiteralValuesFromEnum: true,
-      })("DefaultPropValue.tsx")
-    )
+      })("DefaultPropValue.tsx"),
+    ),
   ).toMatchSnapshot();
 });

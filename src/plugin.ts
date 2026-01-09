@@ -8,6 +8,8 @@ import findCacheDir from "find-cache-dir";
 import flatCache from "flat-cache";
 import crypto from "crypto";
 
+import { DocGenDependency } from "./dependency";
+
 import { LoaderOptions } from "./types";
 import {
   generateDocgenCodeBlock,
@@ -168,7 +170,6 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
         // to simplify the implementation of the file.
         //
         // eslint-disable-next-line
-        const { DocGenDependency } = require("./dependency");
 
         compilation.dependencyTemplates.set(
           // eslint-disable-next-line
@@ -244,7 +245,6 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
             // to simplify the implementation of the file.
             //
             // eslint-disable-next-line
-            const { DocGenDependency } = require("./dependency");
 
             module.addDependency(
               // eslint-disable-next-line

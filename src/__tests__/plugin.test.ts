@@ -1,7 +1,8 @@
 import path from "node:path";
 import { exec } from "node:child_process";
 import webpack from "webpack";
-import ReactDocgenTypeScriptPlugin from "..";
+import ReactDocgenTypeScriptPlugin from "../plugin";
+import { test, expect } from "vitest";
 
 function compile(): Promise<string> {
   return new Promise((resolve, reject) => {

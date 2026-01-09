@@ -1,7 +1,7 @@
 import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
 import tseslint from "typescript-eslint";
-import jest from "eslint-plugin-jest";
+import vitest from "eslint-plugin-vitest";
 import importPlugin from "eslint-plugin-import";
 import jsdoc from "eslint-plugin-jsdoc";
 import globals from "globals";
@@ -16,7 +16,7 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.jest,
+        ...globals.vitest,
       },
       ecmaVersion: "latest",
       sourceType: "module",
@@ -81,22 +81,21 @@ export default tseslint.config(
       "**/__tests__/**/*",
     ],
     plugins: {
-      jest: jest,
+      vitest: vitest,
     },
     languageOptions: {
       globals: {
-        ...globals.jest,
+        ...globals.vitest,
       },
     },
     rules: {
-      ...jest.configs.recommended.rules,
-      ...jest.configs["style"].rules,
+      ...vitest.configs.recommended.rules,
     },
   },
 
   {
     ignores: [
-      "jest.config.js",
+      "vitest.config.ts",
       "**/__fixtures__/**",
       "dist/**",
       "node_modules/**",
