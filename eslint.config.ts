@@ -186,6 +186,7 @@ export default [
   },
   {
     ignores: [
+      'test-output/**',
       'vitest.config.ts',
       'prettier.config.ts',
       'eslint.config.ts',

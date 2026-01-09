@@ -10,9 +10,9 @@ const require = createRequire(import.meta.url);
 test('dist', async () => {
   execSync('npm run build');
 
-  await compile(new (require(import.meta.dirname + '/../../dist/index').default)());
+  await compile(new (require(import.meta.dirname + '/../../dist/index').default)(), 'dist');
 
-  const process = exec('node --experimental-strip-types src/__tests__/check.ts');
+  const process = exec('node --experimental-strip-types src/__tests__/check-dist.ts');
 
   const out = await new Promise<string>((resolve) => {
     let data = '';

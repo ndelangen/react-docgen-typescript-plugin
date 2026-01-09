@@ -13,13 +13,161 @@ export interface GeneratorOptions {
 }
 
 /**
+ * Transforms direct default exports to named exports + re-export pattern.
+ *
+ * Converts: export default function ComponentName() { ... }
+ * To: const DisplayName = function ComponentName() { ... }; export { DisplayName as default };
+ *
+ * Or: export default () => { ... }
+ * To: const DisplayName = () => { ... }; export { DisplayName as default };
+ *
+ * This is necessary because we need to reference the component by displayName for __docgenInfo,
+ * which may differ from the actual function name or may not exist for anonymous functions.
+ */
+function transformDirectDefaultExports(
+  source: string,
+  sourceFile: ts.SourceFile,
+  componentsToTransform: ComponentDoc[],
+): string {
+  const displayNamesToCreate = new Set(componentsToTransform.map((d) => d.displayName));
+  const statementReplacements = new Map<number, ts.Statement[]>();
+  let transformedCount = 0;
+
+  // First pass: identify which statements need to be replaced
+  sourceFile.statements.forEach((stmt, index) => {
+    // Check for: export default function ComponentName() { ... }
+    if (ts.isFunctionDeclaration(stmt)) {
+      const modifiers = ts.getModifiers(stmt);
+      const hasExportDefault =
+        modifiers?.some((mod) => mod.kind === ts.SyntaxKind.ExportKeyword) &&
+        modifiers?.some((mod) => mod.kind === ts.SyntaxKind.DefaultKeyword);
+
+      if (hasExportDefault && stmt.body) {
+        const originalName = stmt.name?.text;
+        const componentDoc = componentsToTransform[transformedCount];
+        if (componentDoc && displayNamesToCreate.has(componentDoc.displayName)) {
+          const displayName = componentDoc.displayName;
+
+          // Remove export and default modifiers
+          const modifiersWithoutExport =
+            modifiers?.filter(
+              (mod) => mod.kind !== ts.SyntaxKind.ExportKeyword && mod.kind !== ts.SyntaxKind.DefaultKeyword,
+            ) || [];
+
+          // Create: const DisplayName = function OriginalName() { ... }
+          const functionName = originalName || displayName;
+          const constDeclaration = ts.factory.createVariableStatement(
+            modifiersWithoutExport,
+            ts.factory.createVariableDeclarationList(
+              [
+                ts.factory.createVariableDeclaration(
+                  ts.factory.createIdentifier(displayName),
+                  undefined,
+                  undefined,
+                  ts.factory.createFunctionExpression(
+                    modifiersWithoutExport,
+                    stmt.asteriskToken,
+                    originalName ? ts.factory.createIdentifier(functionName) : undefined,
+                    stmt.typeParameters,
+                    stmt.parameters,
+                    stmt.type,
+                    stmt.body,
+                  ),
+                ),
+              ],
+              ts.NodeFlags.Const,
+            ),
+          );
+
+          // Create: export { DisplayName as default }
+          const exportDeclaration = ts.factory.createExportDeclaration(
+            undefined,
+            false,
+            ts.factory.createNamedExports([
+              ts.factory.createExportSpecifier(
+                false,
+                ts.factory.createIdentifier(displayName),
+                ts.factory.createIdentifier('default'),
+              ),
+            ]),
+          );
+
+          statementReplacements.set(index, [constDeclaration, exportDeclaration]);
+          transformedCount++;
+        }
+      }
+    }
+
+    // Check for: export default (props) => { ... }
+    if (ts.isExportAssignment(stmt) && !stmt.isExportEquals) {
+      const componentDoc = componentsToTransform[transformedCount];
+      if (componentDoc && displayNamesToCreate.has(componentDoc.displayName)) {
+        const displayName = componentDoc.displayName;
+
+        // Create: const DisplayName = expression;
+        const constDeclaration = ts.factory.createVariableStatement(
+          undefined,
+          ts.factory.createVariableDeclarationList(
+            [
+              ts.factory.createVariableDeclaration(
+                ts.factory.createIdentifier(displayName),
+                undefined,
+                undefined,
+                stmt.expression,
+              ),
+            ],
+            ts.NodeFlags.Const,
+          ),
+        );
+
+        // Create: export { DisplayName as default }
+        const exportDeclaration = ts.factory.createExportDeclaration(
+          undefined,
+          false,
+          ts.factory.createNamedExports([
+            ts.factory.createExportSpecifier(
+              false,
+              ts.factory.createIdentifier(displayName),
+              ts.factory.createIdentifier('default'),
+            ),
+          ]),
+        );
+
+        statementReplacements.set(index, [constDeclaration, exportDeclaration]);
+        transformedCount++;
+      }
+    }
+  });
+
+  // Second pass: rebuild statements array with replacements
+  const newStatements: ts.Statement[] = [];
+  sourceFile.statements.forEach((stmt, index) => {
+    const replacement = statementReplacements.get(index);
+    if (replacement) {
+      newStatements.push(...replacement);
+    } else {
+      newStatements.push(stmt);
+    }
+  });
+
+  const transformedSourceFile = ts.factory.updateSourceFile(sourceFile, newStatements);
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+  return printer.printFile(transformedSourceFile);
+}
+
+/**
  * Gets the identifier name for the component.
  *
  * If the component has a displayName that differs from its
  * identifier, this will return the identifier.
+ *
+ * If the identifier is "default" (direct default export), returns the displayName instead.
  */
 function getComponentIdentifier(d: ComponentDoc): string {
-  return d.expression?.getName() || d.displayName;
+  const identifier = d.expression?.getName() || d.displayName;
+  // If the identifier is "default", it means it's a direct default export
+  // and we need to use the displayName instead since "default" is not a valid identifier
+  return identifier === 'default' ? d.displayName : identifier;
 }
 
 /**
@@ -340,6 +488,25 @@ function setComponentDocGen(d: ComponentDoc, options: GeneratorOptions): ts.Stat
 export function generateDocgenCodeBlock(options: GeneratorOptions): string {
   const sourceFile = ts.createSourceFile(options.filename, options.source, ts.ScriptTarget.ESNext);
 
+  // Check if any component is a direct default export where the identifier doesn't match displayName
+  // This happens when: export default function Name() but displayName is different (from filename)
+  // or: export default () => {} (anonymous, displayName from filename)
+  const componentsNeedingTransformation = options.componentDocs.filter((d) => {
+    const identifier = d.expression?.getName() || d.displayName;
+    // If identifier is "default" or doesn't match displayName, we need to create an alias or transform
+    return identifier === 'default' || identifier !== d.displayName;
+  });
+
+  // Transform source for unit tests (before webpack processing)
+  // For webpack, we'll inject aliases instead
+  let transformedSource = options.source;
+  if (componentsNeedingTransformation.length > 0) {
+    transformedSource = transformDirectDefaultExports(options.source, sourceFile, componentsNeedingTransformation);
+    // Re-parse the transformed source for the printer
+    const transformedSourceFile = ts.createSourceFile(options.filename, transformedSource, ts.ScriptTarget.ESNext);
+    Object.assign(sourceFile, transformedSourceFile);
+  }
+
   const relativeFilename = path.relative('./', path.resolve('./', options.filename)).replace(/\\/g, '/');
 
   const wrapInTryStatement = (statements: ts.Statement[]): ts.TryStatement =>
@@ -367,14 +534,14 @@ export function generateDocgenCodeBlock(options: GeneratorOptions): string {
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
   const printNode = (sourceNode: ts.Node) => printer.printNode(ts.EmitHint.Unspecified, sourceNode, sourceFile);
 
-  // Concat original source code with code from generated code blocks.
+  // Concat source code (transformed if needed) with code from generated code blocks.
   const result = codeBlocks.reduce(
     (acc, node) => `${acc}\n${printNode(node)}`,
 
-    // Use original source text rather than using printNode on the parsed form
+    // Use transformed source if we transformed it, otherwise use original source text
     // to prevent issue where literals are stripped within components.
     // Ref: https://github.com/strothj/react-docgen-typescript-loader/issues/7
-    options.source,
+    transformedSource,
   );
 
   return result;

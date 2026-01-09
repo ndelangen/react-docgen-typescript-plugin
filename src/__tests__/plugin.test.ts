@@ -6,9 +6,9 @@ import ReactDocgenTypeScriptPlugin from '../plugin';
 import { compile } from './test-helpers';
 
 test('source', async () => {
-  await compile(new ReactDocgenTypeScriptPlugin());
+  await compile(new ReactDocgenTypeScriptPlugin(), 'src');
 
-  const process = exec('node --experimental-strip-types src/__tests__/check.ts');
+  const process = exec('node --experimental-strip-types src/__tests__/check-src.ts');
 
   const out = await new Promise<string>((resolve) => {
     let data = '';

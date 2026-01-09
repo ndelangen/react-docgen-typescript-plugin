@@ -1,5 +1,5 @@
 // @ts-expect-error (this is the output of the webpack build, there are no types)
-import * as Tests from '../../test-output/main.mjs';
+import * as Tests from '../../test-output/dist/main.mjs';
 
 /** This file is to help test the actual output of webpack build
  *

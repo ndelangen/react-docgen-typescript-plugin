@@ -30,12 +30,10 @@ catch (__react_docgen_typescript_loader_error) { }"
 
 exports[`adds component with display name to docgen collection 1`] = `
 "interface ButtonComponentProps {
-  text: string;
+    text: string;
 }
-
 export const Button = (props: ButtonComponentProps) => <button>{props.text}</button>;
-
-Button.displayName = 'MyButtonDisplayName';
+Button.displayName = "MyButtonDisplayName";
 
 try {
     // @ts-ignore
@@ -102,56 +100,79 @@ catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > DirectDefaultExport.tsx has code block generated 1`] = `
-"import type { PropsWithChildren } from 'react';
-
+"import type { PropsWithChildren } from "react";
 interface DefaultPropValueComponentProps {
-  /**
-   * Button color.
-   *
-   * @default blue
-   **/
-  color: 'blue' | 'green';
-
-  /**
-   * Button counter.
-   */
-  counter: number;
-
-  /**
-   * Button disabled.
-   */
-  disabled: boolean;
-
-  tabIndex: number;
+    /**
+     * Button color.
+     *
+     * @default blue
+     **/
+    color: "blue" | "green";
+    /**
+     * Button counter.
+     */
+    counter: number;
+    /**
+     * Button disabled.
+     */
+    disabled: boolean;
+    tabIndex: number;
 }
-
-/**
- * Component with a prop with a default value.
- */
-export default function DefaultPropValueComponent(props: PropsWithChildren<DefaultPropValueComponentProps>) {
-  return (
-    <button disabled={props.disabled} style={{ backgroundColor: props.color }}>
+const DirectDefaultExport = function DefaultPropValueComponent(props: PropsWithChildren<DefaultPropValueComponentProps>) {
+    return (<button disabled={props.disabled} style={{ backgroundColor: props.color }}>
       {props.counter}
       {props.children}
-    </button>
-  );
-}
+    </button>);
+};
+export { DirectDefaultExport as default };
 
 try {
     // @ts-ignore
-    default.__docgenInfo = { "description": "Component with a prop with a default value.", "displayName": "DirectDefaultExport", "props": { "color": { "defaultValue": { value: "blue" }, "description": "Button color.", "name": "color", "required": true, "type": { "name": "\\"blue\\" | \\"green\\"" } }, "counter": { "defaultValue": null, "description": "Button counter.", "name": "counter", "required": true, "type": { "name": "number" } }, "disabled": { "defaultValue": null, "description": "Button disabled.", "name": "disabled", "required": true, "type": { "name": "boolean" } }, "tabIndex": { "defaultValue": null, "description": "", "name": "tabIndex", "required": true, "type": { "name": "number" } } } };
+    DirectDefaultExport.__docgenInfo = { "description": "Component with a prop with a default value.", "displayName": "DirectDefaultExport", "props": { "color": { "defaultValue": { value: "blue" }, "description": "Button color.", "name": "color", "required": true, "type": { "name": "\\"blue\\" | \\"green\\"" } }, "counter": { "defaultValue": null, "description": "Button counter.", "name": "counter", "required": true, "type": { "name": "number" } }, "disabled": { "defaultValue": null, "description": "Button disabled.", "name": "disabled", "required": true, "type": { "name": "boolean" } }, "tabIndex": { "defaultValue": null, "description": "", "name": "tabIndex", "required": true, "type": { "name": "number" } } } };
+}
+catch (__react_docgen_typescript_loader_error) { }"
+`;
+
+exports[`component fixture > DirectDefaultExportUnnamed.tsx has code block generated 1`] = `
+"import type { PropsWithChildren } from "react";
+interface DefaultPropValueComponentProps {
+    /**
+     * Button color.
+     *
+     * @default blue
+     **/
+    color: "blue" | "green";
+    /**
+     * Button counter.
+     */
+    counter: number;
+    /**
+     * Button disabled.
+     */
+    disabled: boolean;
+    tabIndex: number;
+}
+const DirectDefaultExportUnnamed = (props: PropsWithChildren<DefaultPropValueComponentProps>) => {
+    return (<button disabled={props.disabled} style={{ backgroundColor: props.color }}>
+      {props.counter}
+      {props.children}
+    </button>);
+};
+export { DirectDefaultExportUnnamed as default };
+
+try {
+    // @ts-ignore
+    DirectDefaultExportUnnamed.__docgenInfo = { "description": "Component with a prop with a default value.", "displayName": "DirectDefaultExportUnnamed", "props": { "color": { "defaultValue": { value: "blue" }, "description": "Button color.", "name": "color", "required": true, "type": { "name": "\\"blue\\" | \\"green\\"" } }, "counter": { "defaultValue": null, "description": "Button counter.", "name": "counter", "required": true, "type": { "name": "number" } }, "disabled": { "defaultValue": null, "description": "Button disabled.", "name": "disabled", "required": true, "type": { "name": "boolean" } }, "tabIndex": { "defaultValue": null, "description": "", "name": "tabIndex", "required": true, "type": { "name": "number" } } } };
 }
 catch (__react_docgen_typescript_loader_error) { }"
 `;
 
 exports[`component fixture > DisplayName.tsx has code block generated 1`] = `
 "interface ButtonComponentProps {
-  text: string;
+    text: string;
 }
-
 export const Button = (props: ButtonComponentProps) => <button>{props.text}</button>;
-
-Button.displayName = 'MyButtonDisplayName';
+Button.displayName = "MyButtonDisplayName";
 
 try {
     // @ts-ignore

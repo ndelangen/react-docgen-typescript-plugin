@@ -96,12 +96,19 @@ function processModule(
     return;
   }
 
-  const docs = generateDocgenCodeBlock({
+  // Read the original source file content
+  const sourceCode = ts.sys.readFile(userRequest) || '';
+  const fullOutput = generateDocgenCodeBlock({
     filename: userRequest,
-    source: userRequest,
+    source: sourceCode,
     componentDocs,
     ...loaderOptions,
-  }).substring(userRequest.length);
+  });
+
+  // Extract just the docgen code blocks
+  const docs = fullOutput.includes('try {')
+    ? fullOutput.substring(fullOutput.indexOf('try {'))
+    : fullOutput.substring(sourceCode.length);
 
   // @ts-expect-error: (Webpack 4 type)
   let sourceWithDocs = webpackModule._source._value;
@@ -214,16 +221,26 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
           // Since this file is needed only for webpack 5, load it only then
           // to simplify the implementation of the file.
 
+          // Read the original source file content (before webpack processing)
+          // react-docgen-typescript will parse from the file, but we need the source for transformation
+          const sourceCode = ts.sys.readFile(name) || '';
+          const fullOutput = generateDocgenCodeBlock({
+            filename: name,
+            source: sourceCode,
+            componentDocs: docGenParser.parseWithProgramProvider(name, () => tsProgram),
+            ...generateOptions,
+          });
+
+          // Extract just the docgen code blocks (everything after the original source)
+          // Note: If transformation happened, the source length changed, so we find where docgen code starts
+          // by looking for the try block pattern that we inject
+          const docgenCode = fullOutput.includes('try {')
+            ? fullOutput.substring(fullOutput.indexOf('try {'))
+            : fullOutput.substring(sourceCode.length);
+
           module.addDependency(
             // @ts-expect-error: (Webpack 4 type)
-            new DocGenDependency(
-              generateDocgenCodeBlock({
-                filename: name,
-                source: name,
-                componentDocs: docGenParser.parseWithProgramProvider(name, () => tsProgram),
-                ...generateOptions,
-              }).substring(name.length),
-            ),
+            new DocGenDependency(docgenCode),
           );
         });
       });

@@ -4,13 +4,13 @@ import webpack from 'webpack';
 
 import type ReactDocgenTypeScriptPlugin from '../plugin';
 
-export function compile(plugin: ReactDocgenTypeScriptPlugin): Promise<string> {
+export function compile(plugin: ReactDocgenTypeScriptPlugin, directory: string): Promise<string> {
   return new Promise((resolve, reject) => {
     webpack({
       mode: 'production',
       entry: { main: './src/__tests__/index.ts' },
       output: {
-        path: path.join(process.cwd(), 'test-output'),
+        path: path.join(process.cwd(), 'test-output', directory),
         module: true,
         libraryTarget: 'module',
       },
