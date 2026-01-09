@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { ParserOptions, parse } from 'react-docgen-typescript/lib/parser.js';
+import { type ParserOptions, parse } from 'react-docgen-typescript/lib/parser.js';
 import { describe, expect, it } from 'vitest';
 
-import { GeneratorOptions, generateDocgenCodeBlock } from '../generateDocgenCodeBlock';
+import { type GeneratorOptions, generateDocgenCodeBlock } from '../generateDocgenCodeBlock';
 
 const defaultParserOptions = { shouldIncludeExpression: true };
 

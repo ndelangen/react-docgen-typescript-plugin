@@ -1,4 +1,4 @@
-import * as React from "react";
+import type { FC, PropsWithChildren } from "react";
 
 interface MultiPropsComponentProps {
   /** Button color. */
@@ -11,6 +11,6 @@ interface MultiPropsComponentProps {
 /**
  * This is a component with multiple props.
  */
-export const MultiPropsComponent: React.FC<MultiPropsComponentProps> = (
+export const MultiPropsComponent: FC<PropsWithChildren<MultiPropsComponentProps>> = (
   props
 ) => <button style={{ backgroundColor: props.color }}>{props.children}</button>;

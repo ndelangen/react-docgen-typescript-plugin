@@ -7,17 +7,10 @@ import vitest from 'eslint-plugin-vitest';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
-  // Base JavaScript recommended rules
+export default [
   js.configs.recommended,
-
-  // TypeScript recommended rules
   ...tseslint.configs.recommended,
-
-  // Prettier config (must be last to override formatting rules)
   prettier,
-
-  // Global configurations
   {
     languageOptions: {
       globals: {
@@ -28,8 +21,6 @@ export default tseslint.config(
       sourceType: 'module',
     },
   },
-
-  // TypeScript files configuration
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
@@ -46,10 +37,7 @@ export default tseslint.config(
       prettier: prettierPlugin,
     },
     rules: {
-      // Prettier
       'prettier/prettier': 'error',
-
-      // TypeScript-specific rule overrides
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': [
@@ -59,10 +47,16 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
         },
       ],
-
-      // Import rules
       'import/no-unresolved': 'off',
       'import/extensions': 'off',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'inline-type-imports',
+        },
+      ],
+      '@typescript-eslint/no-import-type-side-effects': 'error',
       '@typescript-eslint/no-restricted-imports': [
         'error',
         {
@@ -108,14 +102,10 @@ export default tseslint.config(
           ],
         },
       ],
-
-      // General rules
       complexity: 'off',
       'class-methods-use-this': 'off',
     },
   },
-
-  // JavaScript files configuration
   {
     files: ['**/*.js', '**/*.mjs'],
     languageOptions: {
@@ -180,8 +170,6 @@ export default tseslint.config(
       ],
     },
   },
-
-  // Vitest test files configuration
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js', '**/__tests__/**/*'],
     plugins: {
@@ -196,9 +184,14 @@ export default tseslint.config(
       ...vitest.configs.recommended.rules,
     },
   },
-
-  // Ignore patterns
   {
-    ignores: ['vitest.config.ts', '**/__fixtures__/**', 'dist/**', 'node_modules/**'],
+    ignores: [
+      'vitest.config.ts',
+      'prettier.config.ts',
+      'eslint.config.ts',
+      '**/__fixtures__/**',
+      'dist/**',
+      'node_modules/**',
+    ],
   },
-);
+];

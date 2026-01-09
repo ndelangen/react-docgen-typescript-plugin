@@ -7,11 +7,11 @@ import { FlatCache } from 'flat-cache';
 import { matcher } from 'micromatch';
 import * as docGen from 'react-docgen-typescript';
 import ts from 'typescript';
-import * as webpack from 'webpack';
+import type * as webpack from 'webpack';
 
 import { DocGenDependency } from './dependency';
-import { GeneratorOptions, generateDocgenCodeBlock } from './generateDocgenCodeBlock';
-import { LoaderOptions } from './types';
+import { type GeneratorOptions, generateDocgenCodeBlock } from './generateDocgenCodeBlock';
+import type { LoaderOptions } from './types';
 
 const debugExclude = createDebug('docgen:exclude');
 const debugInclude = createDebug('docgen:include');

@@ -1,4 +1,4 @@
-import * as webpack from 'webpack';
+import type * as webpack from 'webpack';
 // eslint-disable-next-line
 // @ts-ignore: What's the right way to refer to this one?
 import NullDependency from 'webpack/lib/dependencies/NullDependency.js';

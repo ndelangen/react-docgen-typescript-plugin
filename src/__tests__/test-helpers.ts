@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import webpack from 'webpack';
 
-import ReactDocgenTypeScriptPlugin from '../plugin';
+import type ReactDocgenTypeScriptPlugin from '../plugin';
 
 export function compile(plugin: ReactDocgenTypeScriptPlugin): Promise<string> {
   return new Promise((resolve, reject) => {
