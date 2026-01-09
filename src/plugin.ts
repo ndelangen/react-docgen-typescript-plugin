@@ -168,15 +168,11 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
       (compilation: webpack.Compilation) => {
         // Since this file is needed only for webpack 5, load it only then
         // to simplify the implementation of the file.
-        //
-        // eslint-disable-next-line
 
         compilation.dependencyTemplates.set(
-          // eslint-disable-next-line
-          // @ts-ignore: Webpack 4 type
+          // @ts-expect-error: (Webpack 4 type)
           DocGenDependency,
-          // eslint-disable-next-line
-          // @ts-ignore: Webpack 4 type
+          // @ts-expect-error: (Webpack 4 type)
           new DocGenDependency.Template(),
         );
 
@@ -198,16 +194,14 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
             }
 
             // Ignore external modules
-            // eslint-disable-next-line
-            // @ts-ignore: Webpack 4 type
+            // @ts-expect-error: (Webpack 4 type)
             if (module.external) {
               debugExclude(`Ignoring external module: ${nameForCondition}`);
               return;
             }
 
             // Ignore raw requests
-            // eslint-disable-next-line
-            // @ts-ignore: Webpack 4 type
+            // @ts-expect-error: (Webpack 4 type)
             if (!module.rawRequest) {
               debugExclude(
                 `Ignoring module without "rawRequest": ${nameForCondition}`,
@@ -243,12 +237,9 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
           modulesToProcess.forEach(([name, module]) => {
             // Since this file is needed only for webpack 5, load it only then
             // to simplify the implementation of the file.
-            //
-            // eslint-disable-next-line
 
             module.addDependency(
-              // eslint-disable-next-line
-              // @ts-ignore: Webpack 4 type
+              // @ts-expect-error: (Webpack 4 type)
               new DocGenDependency(
                 generateDocgenCodeBlock({
                   filename: name,
@@ -279,66 +270,54 @@ export default class DocgenPlugin implements webpack.WebpackPluginInstance {
         const modulesToProcess: webpack.Module[] = [];
 
         compilation.modules.forEach((module: webpack.Module) => {
-          // eslint-disable-next-line
-          // @ts-ignore: Webpack 4 type
+          // @ts-expect-error: (Webpack 4 type)
           if (!module.built) {
-            // eslint-disable-next-line
-            // @ts-ignore: Webpack 4 type
+            // @ts-expect-error: (Webpack 4 type)
             debugExclude(`Ignoring un-built module: ${module.userRequest}`);
             return;
           }
 
-          // eslint-disable-next-line
-          // @ts-ignore: Webpack 4 type
+          // @ts-expect-error: (Webpack 4 type)
           if (module.external) {
-            // eslint-disable-next-line
-            // @ts-ignore: Webpack 4 type
+            // @ts-expect-error: (Webpack 4 type)
             debugExclude(`Ignoring external module: ${module.userRequest}`);
             return;
           }
 
-          // eslint-disable-next-line
-          // @ts-ignore: Webpack 4 type
+          // @ts-expect-error: (Webpack 4 type)
           if (!module.rawRequest) {
             debugExclude(
-              // eslint-disable-next-line
-              // @ts-ignore: Webpack 4 type
+              // @ts-expect-error: (Webpack 4 type)
               `Ignoring module without "rawRequest": ${module.userRequest}`,
             );
             return;
           }
 
-          // eslint-disable-next-line
-          // @ts-ignore: Webpack 4 type
+          // @ts-expect-error: (Webpack 4 type)
           if (isExcluded(module.userRequest)) {
             debugExclude(
-              // eslint-disable-next-line
-              // @ts-ignore: Webpack 4 type
+              // @ts-expect-error: (Webpack 4 type)
               `Module not matched in "exclude": ${module.userRequest}`,
             );
             return;
           }
 
-          // eslint-disable-next-line
-          // @ts-ignore: Webpack 4 type
+          // @ts-expect-error: (Webpack 4 type)
           if (!isIncluded(module.userRequest)) {
             debugExclude(
-              // eslint-disable-next-line
-              // @ts-ignore: Webpack 4 type
+              // @ts-expect-error: (Webpack 4 type)
               `Module not matched in "include": ${module.userRequest}`,
             );
             return;
           }
 
-          // eslint-disable-next-line
-          // @ts-ignore: Webpack 4 type
+          // @ts-expect-error: (Webpack 4 type)
           debugInclude(module.userRequest);
           modulesToProcess.push(module);
         });
 
         const tsProgram = ts.createProgram(
-          // eslint-disable-next-line
-          // @ts-ignore: Webpack 4 type
+          // @ts-expect-error: (Webpack 4 type)
           modulesToProcess.map((v) => v.userRequest),
           compilerOptions,
         );
