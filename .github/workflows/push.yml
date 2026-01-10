@@ -30,6 +30,9 @@ jobs:
         run: pnpm build
       - name: lint
         run: pnpm lint
+
+      - name: check
+        run: pnpm check
       - name: format check
         run: pnpm format:check
       - name: test
@@ -59,4 +62,5 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm build
+          pnpm check
           pnpm release

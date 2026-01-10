@@ -5,7 +5,7 @@
     "strict": true,
     "allowImportingTsExtensions": true,
     "module": "esnext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "rootDir": ".",
     "declaration": true,

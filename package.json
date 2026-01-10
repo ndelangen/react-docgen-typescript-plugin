@@ -21,6 +21,7 @@
     "format": "prettier --write \"**/*.{js,ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"**/*.{js,ts,tsx,json,css,md}\"",
     "lint": "eslint src",
+    "check": "tsc --noEmit",
     "release": "auto shipit",
     "start": "pnpm build --watch",
     "test": "vitest"
