@@ -5,6 +5,8 @@ import * as docgen from 'react-docgen-typescript';
 import ts from 'typescript';
 import type * as webpack from 'webpack';
 
+const loaderLocation = require.resolve(__dirname + '/../dist/loader.js');
+
 interface TypescriptOptions {
   /**
    * Specify the location of the tsconfig.json to use. Can not be used with
@@ -12,7 +14,9 @@ interface TypescriptOptions {
    **/
   tsconfigPath?: string;
   /** Specify TypeScript compiler options. Can not be used with tsconfigPath. */
-  compilerOptions?: ts.CompilerOptions;
+  compilerOptions?: Parameters<typeof docgen.withCompilerOptions>[0];
+  /** Specify parser options. */
+  parserOptions?: Parameters<typeof docgen.withCompilerOptions>[1];
 }
 
 export type PluginOptions = TypescriptOptions & {
@@ -52,13 +56,16 @@ export class ReactDocgenTypeScriptPlugin implements webpack.WebpackPluginInstanc
   apply(compiler: webpack.Compiler): void {
     const options = this.getOptions();
     const pluginName = 'DocGenPlugin';
+    const parser = docgen.withCompilerOptions(options.compilerOptions, options.parserOptions);
+
     compiler.hooks.compilation.tap(pluginName, (_, { normalModuleFactory }) => {
       normalModuleFactory.hooks.afterResolve.tap(pluginName, (result) => {
         if (/\.(tsx?)$/.test(result.request)) {
           result.createData.loaders = result.createData.loaders || [];
+
           result.createData.loaders?.push({
-            loader: require.resolve(__dirname + '/../dist/loader.js'),
-            options: { parser: docgen.withCompilerOptions(options.compilerOptions, { shouldIncludeExpression: true }) },
+            loader: loaderLocation,
+            options: { parser },
           });
         }
       });
@@ -66,9 +73,14 @@ export class ReactDocgenTypeScriptPlugin implements webpack.WebpackPluginInstanc
   }
 
   getOptions(): {
-    compilerOptions: ts.CompilerOptions;
+    compilerOptions: Parameters<typeof docgen.withCompilerOptions>[0];
+    parserOptions: Parameters<typeof docgen.withCompilerOptions>[1];
   } {
-    const { tsconfigPath = './tsconfig.json', compilerOptions: userCompilerOptions } = this.options;
+    const {
+      tsconfigPath = './tsconfig.json',
+      compilerOptions: userCompilerOptions,
+      parserOptions: userParserOptions,
+    } = this.options;
 
     let compilerOptions = {
       jsx: ts.JsxEmit.React,
@@ -88,8 +100,11 @@ export class ReactDocgenTypeScriptPlugin implements webpack.WebpackPluginInstanc
 
     return {
       compilerOptions,
+      parserOptions: {
+        //
+        ...userParserOptions,
+        shouldIncludeExpression: true,
+      },
     };
   }
 }
-
-export type DocgenPluginType = typeof ReactDocgenTypeScriptPlugin;

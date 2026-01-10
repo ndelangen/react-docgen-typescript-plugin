@@ -11,7 +11,7 @@ export default async function loader(this: LoaderContext<{ parser: docgen.FilePa
     const rootName = rootExpression?.getName();
     const data = {
       description: component.description,
-      displayName: displayName,
+      displayName,
       props: Object.entries(component.props).map(([propName, prop]) => ({
         name: propName,
         description: prop.description,

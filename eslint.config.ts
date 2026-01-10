@@ -56,6 +56,7 @@ const config: Linter.Config[] = [
       'n/prefer-node-protocol': 'error',
       complexity: 'off',
       'class-methods-use-this': 'off',
+      'object-shorthand': ['error', 'always'],
     },
   },
   {
