@@ -3,6 +3,8 @@ import { createRequire } from 'node:module';
 
 import { expect, test } from 'vitest';
 
+import '../loader';
+import '../plugin';
 import { compile } from './test-helpers';
 
 const require = createRequire(import.meta.url);
@@ -10,7 +12,10 @@ const require = createRequire(import.meta.url);
 test('dist', async () => {
   execSync('npm run build');
 
-  await compile(new (require(import.meta.dirname + '/../../dist/index').default)(), 'dist');
+  const location = import.meta.dirname + '/../../dist/index.js';
+  const { ReactDocgenTypeScriptPlugin } = require(location);
+
+  await compile(new ReactDocgenTypeScriptPlugin(), 'dist');
 
   const process = exec('node --experimental-strip-types src/__tests__/check-dist.ts');
 

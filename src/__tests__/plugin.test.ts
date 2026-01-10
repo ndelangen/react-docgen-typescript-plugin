@@ -1,13 +1,17 @@
-import { exec } from 'node:child_process';
+import { exec, execSync } from 'node:child_process';
 
 import { expect, test } from 'vitest';
 
-import ReactDocgenTypeScriptPlugin from '../plugin';
+// make vitest watch the file
+import '../loader';
+import { DocgenPlugin as ReactDocgenTypeScriptPlugin } from '../plugin';
 import { compile } from './test-helpers';
 
 test('source', async () => {
-  const output = await compile(new ReactDocgenTypeScriptPlugin(), 'src');
-  console.log(output);
+  // The plugin sets a loader, which must reference a file, that must be regular (commonjs) JS (not Typescript)
+  // So we need to build the plugin first, and then run the test
+  execSync('npm run build');
+  await compile(new ReactDocgenTypeScriptPlugin(), 'src');
 
   const process = exec('node --experimental-strip-types src/__tests__/check-src.ts');
 
