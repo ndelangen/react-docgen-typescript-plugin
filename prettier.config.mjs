@@ -2,7 +2,7 @@
 export default {
   printWidth: 120,
   singleQuote: true,
-  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  plugins: ['@stzhu/prettier-plugin-tsconfig', '@trivago/prettier-plugin-sort-imports'],
   importOrder: ['^node:', '^[^.]', '^\\.'],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,

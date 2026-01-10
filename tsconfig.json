@@ -2,20 +2,20 @@
   "include": ["src/**/*", "typings/**/*", "vitest.config.ts", "eslint.config.ts", "prettier.config.mjs"],
 
   "compilerOptions": {
-    "noEmit": true,
+    "strict": true,
     "allowImportingTsExtensions": true,
-    "target": "es2020",
     "module": "esnext",
     "moduleResolution": "Bundler",
-    "lib": ["esnext"],
+    "resolveJsonModule": true,
     "rootDir": ".",
-    "jsx": "react-jsx",
     "declaration": true,
-    "strict": true,
+    "importHelpers": true,
+    "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "importHelpers": true,
+    "jsx": "react-jsx",
+    "lib": ["esnext"],
+    "target": "es2020",
     "skipLibCheck": true
   }
 }
