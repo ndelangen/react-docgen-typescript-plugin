@@ -6,3 +6,4 @@ coverage
 .env
 yarn-error.log
 test-output
+.yarn/*.gz
