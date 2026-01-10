@@ -40,13 +40,7 @@ function getTSConfigFile(tsconfigPath: string): ts.ParsedCommandLine {
 
 /** Inject typescript docgen information into modules at the end of a build */
 export class ReactDocgenTypeScriptPlugin implements webpack.WebpackPluginInstance {
-  public static defaultOptions = {
-    setDisplayName: true,
-    typePropName: 'type',
-    docgenCollectionName: 'STORYBOOK_REACT_CLASSES',
-  };
-
-  private name = 'React Docgen Typescript Plugin';
+  private readonly name = 'react-docgen-typescript-plugin';
   private options: PluginOptions;
 
   constructor(options: PluginOptions = {}) {
@@ -55,11 +49,10 @@ export class ReactDocgenTypeScriptPlugin implements webpack.WebpackPluginInstanc
 
   apply(compiler: webpack.Compiler): void {
     const options = this.getOptions();
-    const pluginName = 'DocGenPlugin';
     const parser = docgen.withCompilerOptions(options.compilerOptions, options.parserOptions);
 
-    compiler.hooks.compilation.tap(pluginName, (_, { normalModuleFactory }) => {
-      normalModuleFactory.hooks.afterResolve.tap(pluginName, (result) => {
+    compiler.hooks.compilation.tap(this.name, (_, { normalModuleFactory }) => {
+      normalModuleFactory.hooks.afterResolve.tap(this.name, (result) => {
         if (/\.(tsx?)$/.test(result.request)) {
           result.createData.loaders = result.createData.loaders || [];
 
@@ -95,13 +88,15 @@ export class ReactDocgenTypeScriptPlugin implements webpack.WebpackPluginInstanc
       };
     } else {
       const { options: tsOptions } = getTSConfigFile(tsconfigPath);
-      compilerOptions = { ...compilerOptions, ...tsOptions };
+      compilerOptions = {
+        ...compilerOptions,
+        ...tsOptions,
+      };
     }
 
     return {
       compilerOptions,
       parserOptions: {
-        //
         ...userParserOptions,
         shouldIncludeExpression: true,
       },
