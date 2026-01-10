@@ -1,29 +1,24 @@
 import js from '@eslint/js';
+import type { Linter } from 'eslint';
 import prettier from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
 import jsdoc from 'eslint-plugin-jsdoc';
+import nPlugin from 'eslint-plugin-n';
 import prettierPlugin from 'eslint-plugin-prettier';
 import vitest from 'eslint-plugin-vitest';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default [
+const config: Linter.Config[] = [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   prettier,
   {
+    files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.vitest,
       },
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-    },
-  },
-  {
-    files: ['**/*.ts', '**/*.tsx'],
-    languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
         project: './tsconfig.json',
@@ -34,6 +29,7 @@ export default [
       '@typescript-eslint': tseslint.plugin,
       import: importPlugin,
       jsdoc: jsdoc,
+      n: nPlugin,
       prettier: prettierPlugin,
     },
     rules: {
@@ -57,128 +53,20 @@ export default [
         },
       ],
       '@typescript-eslint/no-import-type-side-effects': 'error',
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: [
-                '^assert$',
-                '^buffer$',
-                '^child_process$',
-                '^cluster$',
-                '^console$',
-                '^constants$',
-                '^crypto$',
-                '^dgram$',
-                '^dns$',
-                '^domain$',
-                '^events$',
-                '^fs$',
-                '^http$',
-                '^https$',
-                '^module$',
-                '^net$',
-                '^os$',
-                '^path$',
-                '^punycode$',
-                '^querystring$',
-                '^readline$',
-                '^repl$',
-                '^stream$',
-                '^string_decoder$',
-                '^sys$',
-                '^timers$',
-                '^tls$',
-                '^tty$',
-                '^url$',
-                '^util$',
-                '^vm$',
-                '^zlib$',
-              ],
-              message:
-                "Node.js built-in modules must be imported with the 'node:' prefix (e.g., 'node:fs' instead of 'fs').",
-            },
-          ],
-        },
-      ],
+      'n/prefer-node-protocol': 'error',
       complexity: 'off',
       'class-methods-use-this': 'off',
     },
   },
   {
-    files: ['**/*.js', '**/*.mjs'],
-    languageOptions: {
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
-    plugins: {
-      import: importPlugin,
-      '@typescript-eslint': tseslint.plugin,
-      prettier: prettierPlugin,
-    },
-    rules: {
-      'prettier/prettier': 'error',
-      'import/no-unresolved': 'off',
-      'import/extensions': 'off',
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: [
-                '^assert$',
-                '^buffer$',
-                '^child_process$',
-                '^cluster$',
-                '^console$',
-                '^constants$',
-                '^crypto$',
-                '^dgram$',
-                '^dns$',
-                '^domain$',
-                '^events$',
-                '^fs$',
-                '^http$',
-                '^https$',
-                '^module$',
-                '^net$',
-                '^os$',
-                '^path$',
-                '^punycode$',
-                '^querystring$',
-                '^readline$',
-                '^repl$',
-                '^stream$',
-                '^string_decoder$',
-                '^sys$',
-                '^timers$',
-                '^tls$',
-                '^tty$',
-                '^url$',
-                '^util$',
-                '^vm$',
-                '^zlib$',
-              ],
-              message:
-                "Node.js built-in modules must be imported with the 'node:' prefix (e.g., 'node:fs' instead of 'fs').",
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js', '**/__tests__/**/*'],
-    plugins: {
-      vitest: vitest,
-    },
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**/*'],
     languageOptions: {
       globals: {
         ...globals.vitest,
       },
+    },
+    plugins: {
+      vitest: vitest,
     },
     rules: {
       ...vitest.configs.recommended.rules,
@@ -187,8 +75,7 @@ export default [
   {
     ignores: [
       'test-output/**',
-      'vitest.config.ts',
-      'prettier.config.ts',
+      'prettier.config.mjs',
       'eslint.config.ts',
       '**/__fixtures__/**',
       'dist/**',
@@ -196,3 +83,5 @@ export default [
     ],
   },
 ];
+
+export default config;

@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*", "typings/**/*"],
+  "include": ["src/**/*", "typings/**/*", "vitest.config.ts", "eslint.config.ts", "prettier.config.mjs"],
 
   "compilerOptions": {
     "noEmit": true,
@@ -8,7 +8,7 @@
     "module": "esnext",
     "moduleResolution": "Bundler",
     "lib": ["esnext"],
-    "rootDir": "./src",
+    "rootDir": ".",
     "jsx": "react-jsx",
     "declaration": true,
     "strict": true,

@@ -3,8 +3,8 @@ import { createRequire } from 'node:module';
 
 import { expect, test } from 'vitest';
 
+import '../index';
 import '../loader';
-import '../plugin';
 import { compile } from './test-helpers';
 
 const require = createRequire(import.meta.url);

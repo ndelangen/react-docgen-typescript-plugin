@@ -2,9 +2,9 @@ import { exec, execSync } from 'node:child_process';
 
 import { expect, test } from 'vitest';
 
+import { ReactDocgenTypeScriptPlugin } from '..';
 // make vitest watch the file
 import '../loader';
-import { DocgenPlugin as ReactDocgenTypeScriptPlugin } from '../plugin';
 import { compile } from './test-helpers';
 
 test('source', async () => {
