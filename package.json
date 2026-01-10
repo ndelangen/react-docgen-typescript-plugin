@@ -2,21 +2,6 @@
   "name": "react-docgen-typescript-plugin",
   "version": "1.0.8",
   "description": "A webpack plugin to inject react typescript docgen information.",
-  "license": "MIT",
-  "repository": "hipstersmoothie/react-docgen-typescript-plugin",
-  "author": "Andrew Lisowski <lisowski54@gmail.com>",
-  "main": "dist/index.js",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
-  },
-  "scripts": {
-    "build": "tsup src/index.ts src/loader.ts --dts",
-    "start": "pnpm build --watch",
-    "lint": "eslint src",
-    "test": "vitest",
-    "release": "auto shipit"
-  },
   "keywords": [
     "react",
     "docgen",
@@ -24,9 +9,26 @@
     "webpack",
     "plugin"
   ],
+  "repository": "hipstersmoothie/react-docgen-typescript-plugin",
+  "license": "MIT",
+  "author": "Andrew Lisowski <lisowski54@gmail.com>",
+  "main": "dist/index.js",
   "files": [
     "dist"
   ],
+  "scripts": {
+    "build": "tsup src/index.ts src/loader.ts --dts",
+    "lint": "eslint src",
+    "release": "auto shipit",
+    "start": "pnpm build --watch",
+    "test": "vitest"
+  },
+  "lint-staged": {
+    "*.{js,css,md}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
@@ -66,14 +68,12 @@
     "typescript": ">= 5.x",
     "webpack": ">= 5"
   },
-  "lint-staged": {
-    "*.{js,css,md}": [
-      "prettier --write",
-      "git add"
-    ]
+  "packageManager": "pnpm@10.25.0+sha512.5e82639027af37cf832061bcc6d639c219634488e0f2baebe785028a793de7b525ffcd3f7ff574f5e9860654e098fe852ba8ac5dd5cefe1767d23a020a92f501",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "auto": {
     "extends": "hipstersmoothie"
-  },
-  "packageManager": "pnpm@10.25.0+sha512.5e82639027af37cf832061bcc6d639c219634488e0f2baebe785028a793de7b525ffcd3f7ff574f5e9860654e098fe852ba8ac5dd5cefe1767d23a020a92f501"
+  }
 }
